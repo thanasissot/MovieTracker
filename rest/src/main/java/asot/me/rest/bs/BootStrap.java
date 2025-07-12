@@ -52,10 +52,10 @@ public class BootStrap implements CommandLineRunner {
 
     private void initializeGenres() {
         List<Genre> genres = new ArrayList<>();
-        for (GenreName genreName : GenreName.values()) {
+        for (GenreEnums genreEnums : GenreEnums.values()) {
             Genre genre = Genre.builder()
-                    .id((long) genreName.getId())
-                    .type(genreName)
+                    .id((long) genreEnums.getId())
+                    .genreName(genreEnums.toString())
                     .build();
             genres.add(genre);
         }

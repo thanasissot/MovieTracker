@@ -1,6 +1,6 @@
 package asot.me.rest.dom;
 
-public enum GenreName {
+public enum GenreEnums {
     ACTION(1),
     ADVENTURE(2),
     ANIMATION(3),
@@ -23,7 +23,7 @@ public enum GenreName {
 
     private final int id;
 
-    GenreName(int id) {
+    GenreEnums(int id) {
         this.id = id;
     }
 

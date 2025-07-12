@@ -1,7 +1,7 @@
 package asot.me.rest.service;
 
 import asot.me.rest.dom.Genre;
-import asot.me.rest.dom.GenreName;
+import asot.me.rest.dom.GenreEnums;
 import asot.me.rest.dom.TvShow;
 import asot.me.rest.repository.GenreRepository;
 import asot.me.rest.repository.TvShowRepository;
@@ -33,19 +33,9 @@ public class TvShowService {
     }
 
     private List<Long> getGenreIdsByNames(List<String> genreNames) {
-        List<GenreName> genreTypes = genreNames.stream()
-                .map(name -> {
-                    try {
-                        return GenreName.valueOf(name.toUpperCase().replace(" ", "_"));
-                    } catch (IllegalArgumentException e) {
-                        throw new IllegalArgumentException("Unknown genre: " + name);
-                    }
-                })
-                .collect(Collectors.toList());
+        List<Genre> genres = genreRepository.findByGenreNameIn(genreNames);
 
-        List<Genre> genres = genreRepository.findByTypeIn(genreTypes);
-
-        if (genres.size() != genreTypes.size()) {
+        if (genres.size() != genreNames.size()) {
             throw new IllegalArgumentException("Some genres could not be found");
         }
 
