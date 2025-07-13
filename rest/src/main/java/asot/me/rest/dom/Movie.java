@@ -1,8 +1,7 @@
 package asot.me.rest.dom;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -19,6 +20,7 @@ import java.util.List;
 @Entity
 public class Movie {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     private String title;
     private Long year;
@@ -27,8 +29,8 @@ public class Movie {
     @JdbcTypeCode(SqlTypes.JSON)
     private List<Long> genreIds;
 
-    @Column(columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private List<Long> actorIds;
+    @JsonIgnore
+    @ManyToMany(mappedBy = "movies", targetEntity = Actor.class)
+    private Set<Actor> actors = new HashSet<>();
 
 }

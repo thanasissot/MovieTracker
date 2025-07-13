@@ -1,6 +1,7 @@
 package asot.me.rest.controller;
 
 import asot.me.rest.dom.Actor;
+import asot.me.rest.dto.ActorDto;
 import asot.me.rest.service.ActorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,11 @@ public class ActorController {
     @GetMapping("/{id}")
     public ResponseEntity<Actor> getActor(@PathVariable Long id) {
         return ResponseEntity.ok(actorService.getActor(id));
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<ActorDto> createActor(@RequestBody ActorDto actorDto) {
+        return ResponseEntity.ok(actorService.createActor(actorDto));
     }
 
     @PutMapping("/{id}/movies")

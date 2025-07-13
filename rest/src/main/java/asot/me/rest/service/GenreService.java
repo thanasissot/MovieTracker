@@ -26,6 +26,11 @@ public class GenreService {
                 .orElseThrow(() -> new RuntimeException("Genre not found with id: " + id)));
     }
 
+    public GenreDto getGenreByName(String genreName) {
+        return genreMapper.toDTO(genreRepository.findByGenreName(genreName)
+                .orElseThrow(() -> new RuntimeException("Genre not found with genreName: " + genreName)));
+    }
+
     @Transactional
     public GenreDto createGenre(GenreDto genreDto) {
         Genre genre = Genre.builder().genreName(genreDto.getGenreName()).build();

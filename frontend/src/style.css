@@ -114,3 +114,7 @@ body {
   border-radius: 10px;
   margin-bottom: 1rem;
 }
+
+RouterLink {
+  margin-right: 2px;
+}

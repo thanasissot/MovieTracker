@@ -131,6 +131,7 @@ const onFormSubmit = (e) => {
       }
     )
   }
+  initialValues.value.genreName = '';
 };
 
 </script>
