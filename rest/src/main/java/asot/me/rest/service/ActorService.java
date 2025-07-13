@@ -11,10 +11,12 @@ import asot.me.rest.repository.TvShowRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,9 +30,10 @@ public class ActorService {
         return actorRepository.findAll();
     }
 
-    public Actor getActor(Long id) {
-        return actorRepository.findById(id)
+    public ActorDto getActor(Long id) {
+        Actor actor =  actorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Actor not found with id: " + id));
+        return actorMapper.toDTO(actor);
     }
 
     public ActorDto createActor(ActorDto actorDto) {
@@ -38,104 +41,50 @@ public class ActorService {
         return actorMapper.toDTO(actorRepository.save(actor));
     }
 
-    @Transactional
-    public Actor updateActorMovies(Long actorId, List<Long> movieIds) {
-        Actor actor = getActor(actorId);
-        // Validate movies exist
-        validateMovies(movieIds);
-
-        // Update actor's movie list
-
-        // Update actor references in movies
-        updateMoviesWithActor(actorId, movieIds);
-
-        return actorRepository.save(actor);
+    public ActorDto addActorToMovies(Long actorId, List<Long> movieIds) {
+        Actor actor =  actorRepository.findById(actorId)
+                .orElseThrow(() -> new EntityNotFoundException("Actor not found with id: " + actorId));
+        List<Movie> movies = movieRepository.findAllById(movieIds);
+        actor.getMovies().addAll(movies);
+        return actorMapper.toDTO(actorRepository.save(actor));
     }
 
-    @Transactional
-    public Actor updateActorTvShows(Long actorId, List<Long> tvShowIds) {
-        Actor actor = getActor(actorId);
-        // Validate TV shows exist
-        validateTvShows(tvShowIds);
+    public ActorDto addActorToTvshows(Long actorId, List<Long> tvshowIds) {
+        Actor actor =  actorRepository.findById(actorId)
+                .orElseThrow(() -> new EntityNotFoundException("Actor not found with id: " + actorId));
+        List<TvShow> tvshows = tvShowRepository.findAllById(tvshowIds);
 
-        // Update actor's TV show list
-
-        // Update actor references in TV shows
-        updateTvShowsWithActor(actorId, tvShowIds);
-
-        return actorRepository.save(actor);
+        actor.getTvshows().addAll(tvshows);
+        return actorMapper.toDTO(actorRepository.save(actor));
     }
 
-    @Transactional
-    public Actor addActorToMovie(Long actorId, Long movieId) {
-        Actor actor = getActor(actorId);
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + movieId));
-
-        // Update actor's movie list
-
-        return actorRepository.save(actor);
-    }
-
-    @Transactional
-    public Actor addActorToTvShow(Long actorId, Long tvShowId) {
-        Actor actor = getActor(actorId);
-        TvShow tvShow = tvShowRepository.findById(tvShowId)
-                .orElseThrow(() -> new EntityNotFoundException("TV show not found with id: " + tvShowId));
-
-        // Update actor's TV show list
-        return actorRepository.save(actor);
-    }
-
-    @Transactional
-    public Actor removeActorFromMovie(Long actorId, Long movieId) {
-        Actor actor = getActor(actorId);
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + movieId));
-
-        // Update actor's movie list
-
-        return actorRepository.save(actor);
-    }
-
-    @Transactional
-    public Actor removeActorFromTvShow(Long actorId, Long tvShowId) {
-        Actor actor = getActor(actorId);
-        TvShow tvShow = tvShowRepository.findById(tvShowId)
-                .orElseThrow(() -> new EntityNotFoundException("TV show not found with id: " + tvShowId));
-
-        // Update actor's TV show list
-
-        return actorRepository.save(actor);
-    }
-
-    private void validateMovies(List<Long> movieIds) {
-        for (Long movieId : movieIds) {
-            if (!movieRepository.existsById(movieId)) {
-                throw new EntityNotFoundException("Movie not found with id: " + movieId);
+    public ActorDto removeActorFromMovies(Long actorId, List<Long> movieIds) {
+        Actor actor =  actorRepository.findById(actorId)
+                .orElseThrow(() -> new EntityNotFoundException("Actor not found with id: " + actorId));
+        List<Movie> movies = new ArrayList<>();
+        Set<Long> movieIdSet = new HashSet<>(movieIds);
+        for (Movie movie : actor.getMovies()) {
+            if (!movieIdSet.contains(movie.getId())) {
+                movies.add(movie);
             }
         }
+
+        actor.setMovies(movies);
+        return actorMapper.toDTO(actorRepository.save(actor));
     }
 
-    private void validateTvShows(List<Long> tvShowIds) {
-        for (Long tvShowId : tvShowIds) {
-            if (!tvShowRepository.existsById(tvShowId)) {
-                throw new EntityNotFoundException("TV show not found with id: " + tvShowId);
+    public ActorDto removeActorFromTvshows(Long actorId, List<Long> tvshowIds) {
+        Actor actor =  actorRepository.findById(actorId)
+                .orElseThrow(() -> new EntityNotFoundException("Actor not found with id: " + actorId));
+        List<TvShow> tvshows = new ArrayList<>();
+        Set<Long> tvshowsIdSet = new HashSet<>(tvshowIds);
+        for (TvShow tvshow : actor.getTvshows()) {
+            if (!tvshowsIdSet.contains(tvshow.getId())) {
+                tvshows.add(tvshow);
             }
         }
-    }
 
-    private void updateMoviesWithActor(Long actorId, List<Long> movieIds) {
-        // Remove actor from movies not in the list
-        List<Movie> allMovies = movieRepository.findAll();
-        for (Movie movie : allMovies) {
-        }
-    }
-
-    private void updateTvShowsWithActor(Long actorId, List<Long> tvShowIds) {
-        // Update TV shows with actor
-        List<TvShow> allTvShows = tvShowRepository.findAll();
-        for (TvShow tvShow : allTvShows) {
-        }
+        actor.setTvshows(tvshows);
+        return actorMapper.toDTO(actorRepository.save(actor));
     }
 }

@@ -5,6 +5,7 @@ import asot.me.rest.repository.ActorRepository;
 import asot.me.rest.repository.GenreRepository;
 import asot.me.rest.repository.MovieRepository;
 import asot.me.rest.repository.TvShowRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.CommandLineRunner;
@@ -26,6 +27,9 @@ public class BootStrap implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        List<Movie> movies = new ArrayList<>();
+        List<TvShow> tvShows = new ArrayList<>();
+
         if (genreRepository.count() == 0) {
             initializeGenres();
         } else {
@@ -40,25 +44,25 @@ public class BootStrap implements CommandLineRunner {
         }
 
         if (movieRepository.count() == 0) {
-            initializeMovies(genreMap);
+            movies = initializeMovies(genreMap);
         } else {
             log.info("Movies already exist in the database. Skipping initialization.");
         }
 
         if (tvShowRepository.count() == 0) {
-            initializeTvShows(genreMap);
+            tvShows = initializeTvShows(genreMap);
         } else {
             log.info("TV Shows already exist in the database. Skipping initialization.");
         }
-//
-//        if (actorRepository.count() == 0) {
-//            initializeActors();
-//        } else {
-//            log.info("Actors already exist in the database. Skipping initialization.");
-//        }
+
+        if (actorRepository.count() == 0) {
+            initializeActors(movies, tvShows);
+        } else {
+            log.info("Actors already exist in the database. Skipping initialization.");
+        }
     }
 
-    private void initializeGenres() {
+    protected void initializeGenres() {
         List<Genre> genres = new ArrayList<>();
         for (GenreEnums genreEnums : GenreEnums.values()) {
             Genre genre = Genre.builder()
@@ -70,7 +74,7 @@ public class BootStrap implements CommandLineRunner {
         log.info("Successfully initialized {} genre records", genres.size());
     }
 
-    private void initializeMovies(HashMap<String, Long> genreMap) {
+    protected List<Movie> initializeMovies(HashMap<String, Long> genreMap) {
         List<Movie> movies = Arrays.asList(
                 Movie.builder()
                         .title("The Shawshank Redemption")
@@ -98,12 +102,11 @@ public class BootStrap implements CommandLineRunner {
                         .genreIds(Arrays.asList(genreMap.get("ADVENTURE"), genreMap.get("FANTASY"))) // CRIME, DRAMA
                         .build()
         );
-
-        movieRepository.saveAll(movies);
         log.info("Successfully initialized {} TV movie records", movies.size());
+        return movieRepository.saveAll(movies);
     }
 
-    private void initializeTvShows(HashMap<String, Long> genreMap) {
+    protected List<TvShow> initializeTvShows(HashMap<String, Long> genreMap) {
         List<TvShow> tvShows = Arrays.asList(
                 TvShow.builder()
                         .title("Breaking Bad")
@@ -131,70 +134,39 @@ public class BootStrap implements CommandLineRunner {
                         .genreIds(Arrays.asList(genreMap.get("DOCUMENTARY"))) // DOCUMENTARY
                         .build()
         );
-
-        tvShowRepository.saveAll(tvShows);
         log.info("Successfully initialized {} TV show records", tvShows.size());
+        return tvShowRepository.saveAll(tvShows);
     }
 
-    private void initializeActors() {
+    protected void initializeActors(List<Movie> movies, List<TvShow> tvShows) {
         List<Actor> actors = Arrays.asList(
                 Actor.builder()
-//                        .id(1L)
                         .firstname("Tom")
                         .lastname("Hanks")
                         .build(),
                 Actor.builder()
-//                        .id(2L)
                         .firstname("Meryl")
                         .lastname("Streep")
                         .build(),
                 Actor.builder()
-//                        .id(3L)
                         .firstname("Leonardo")
                         .lastname("DiCaprio")
                         .build()
         );
 
-        actorRepository.saveAll(actors);
+        actors = actorRepository.saveAll(actors);
         log.info("Successfully initialized {} actors records", actors.size());
 
-        // Update bidirectional references
-//        updateMovieActorReferences();
-//        updateTvShowActorReferences();
+        actors.get(0).setMovies(movies.subList(0, 2));
+        actors.get(0).setTvshows(tvShows.subList(0, 2));
+        actors.get(1).setMovies(movies.subList(2, 4));
+        actors.get(1).setTvshows(tvShows.subList(2, 4));
+        actors.get(2).setMovies(movies.subList(1, 4));
+        actors.get(2).setTvshows(tvShows.subList(1, 4));
+
+        actors = actorRepository.saveAll(actors);
+
     }
 
-//    private void updateMovieActorReferences() {
-//        List<Actor> actors = actorRepository.findAll();
-//        List<Movie> movies = movieRepository.findAll();
-//
-//        for (Movie movie : movies) {
-//            List<Long> actorIds = new ArrayList<>();
-//            for (Actor actor : actors) {
-//                if (actor.getMovieIds() != null && actor.getMovieIds().contains(movie.getId())) {
-//                    actorIds.add(actor.getId());
-//                }
-//            }
-//            movie.setActorIds(actorIds);
-//            movieRepository.save(movie);
-//        }
-//        log.info("Updated actor references in movies");
-//    }
-//
-//    private void updateTvShowActorReferences() {
-//        List<Actor> actors = actorRepository.findAll();
-//        List<TvShow> tvShows = tvShowRepository.findAll();
-//
-//        for (TvShow tvShow : tvShows) {
-//            List<Long> actorIds = new ArrayList<>();
-//            for (Actor actor : actors) {
-//                if (actor.getTvShowIds() != null && actor.getTvShowIds().contains(tvShow.getId())) {
-//                    actorIds.add(actor.getId());
-//                }
-//            }
-//            tvShow.setActorIds(actorIds);
-//            tvShowRepository.save(tvShow);
-//        }
-//        log.info("Updated actor references in TV shows");
-//    }
 
 }

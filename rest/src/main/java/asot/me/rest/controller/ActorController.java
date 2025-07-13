@@ -3,6 +3,7 @@ package asot.me.rest.controller;
 import asot.me.rest.dom.Actor;
 import asot.me.rest.dto.ActorDto;
 import asot.me.rest.service.ActorService;
+import jakarta.persistence.SequenceGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class ActorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Actor> getActor(@PathVariable Long id) {
+    public ResponseEntity<ActorDto> getActor(@PathVariable Long id) {
         return ResponseEntity.ok(actorService.getActor(id));
     }
 
@@ -30,45 +31,36 @@ public class ActorController {
         return ResponseEntity.ok(actorService.createActor(actorDto));
     }
 
-    @PutMapping("/{id}/movies")
-    public ResponseEntity<Actor> updateActorMovies(
+    // Add movies to actor
+    @PostMapping("/{id}/movies")
+    public ResponseEntity<ActorDto> addMoviesToActor(
             @PathVariable Long id,
             @RequestBody List<Long> movieIds) {
-        return ResponseEntity.ok(actorService.updateActorMovies(id, movieIds));
+        return ResponseEntity.ok(actorService.addActorToMovies(id, movieIds));
     }
 
-    @PutMapping("/{id}/tvshows")
-    public ResponseEntity<Actor> updateActorTvShows(
+    // Add TV shows to actor
+    @PostMapping("/{id}/tvshows")
+    public ResponseEntity<ActorDto> addTvShowsToActor(
             @PathVariable Long id,
             @RequestBody List<Long> tvShowIds) {
-        return ResponseEntity.ok(actorService.updateActorTvShows(id, tvShowIds));
+        return ResponseEntity.ok(actorService.addActorToTvshows(id, tvShowIds));
     }
 
-    @PostMapping("/{actorId}/movies/{movieId}")
-    public ResponseEntity<Actor> addActorToMovie(
-            @PathVariable Long actorId,
-            @PathVariable Long movieId) {
-        return ResponseEntity.ok(actorService.addActorToMovie(actorId, movieId));
+    // Remove movies from actor
+    @DeleteMapping("/{id}/movies")
+    public ResponseEntity<ActorDto> removeMoviesFromActor(
+            @PathVariable Long id,
+            @RequestBody List<Long> movieIds) {
+        return ResponseEntity.ok(actorService.removeActorFromMovies(id, movieIds));
     }
 
-    @PostMapping("/{actorId}/tvshows/{tvShowId}")
-    public ResponseEntity<Actor> addActorToTvShow(
-            @PathVariable Long actorId,
-            @PathVariable Long tvShowId) {
-        return ResponseEntity.ok(actorService.addActorToTvShow(actorId, tvShowId));
+    // Remove TV shows from actor
+    @DeleteMapping("/{id}/tvshows")
+    public ResponseEntity<ActorDto> removeTvShowsFromActor(
+            @PathVariable Long id,
+            @RequestBody List<Long> tvShowIds) {
+        return ResponseEntity.ok(actorService.removeActorFromTvshows(id, tvShowIds));
     }
 
-    @DeleteMapping("/{actorId}/movies/{movieId}")
-    public ResponseEntity<Actor> removeActorFromMovie(
-            @PathVariable Long actorId,
-            @PathVariable Long movieId) {
-        return ResponseEntity.ok(actorService.removeActorFromMovie(actorId, movieId));
-    }
-
-    @DeleteMapping("/{actorId}/tvshows/{tvShowId}")
-    public ResponseEntity<Actor> removeActorFromTvShow(
-            @PathVariable Long actorId,
-            @PathVariable Long tvShowId) {
-        return ResponseEntity.ok(actorService.removeActorFromTvShow(actorId, tvShowId));
-    }
 }

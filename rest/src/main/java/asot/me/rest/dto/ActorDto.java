@@ -1,5 +1,7 @@
 package asot.me.rest.dto;
 
+import asot.me.rest.dom.Movie;
+import asot.me.rest.dom.TvShow;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,6 +13,6 @@ public class ActorDto {
     private Long id;
     private String firstname;
     private String lastname;
-    private List<Long> movieIds; // JSON string representation of List<Long>
-    private List<Long> tvShowIds; // JSON string representation of List<Long>
+    private List<Movie> movies;
+    private List<TvShow> tvshows;
 }
