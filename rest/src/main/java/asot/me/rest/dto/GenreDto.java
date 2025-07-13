@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class GenreDto {
-    private String id;
+    private Long id;
     private String genreName;
 }
