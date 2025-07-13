@@ -33,7 +33,7 @@ public class GenreController {
     @PutMapping("/edit")
     public ResponseEntity<GenreDto> updateGenreName(
             @RequestBody GenreDto genreDto) {
-        GenreDto updatedGenre = genreService.updateGenreName(Long.parseLong(genreDto.getId()), genreDto.getGenreName());
+        GenreDto updatedGenre = genreService.updateGenreName(genreDto.getId(), genreDto.getGenreName());
         return ResponseEntity.ok(updatedGenre);
     }
 }
