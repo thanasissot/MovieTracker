@@ -44,7 +44,7 @@
 import { ref } from 'vue';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { z } from 'zod';
-import { Form } from '@primevue/forms';
+import {Form, type FormSubmitEvent} from '@primevue/forms';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
@@ -70,10 +70,11 @@ const resolver = zodResolver(
     })
 );
 
-const onFormSubmit = (e: { valid: boolean; values: any }) => {
+const onFormSubmit = (e: FormSubmitEvent) => {
   if (e.valid && dataTable.value) {
     dataTable.value.handleSubmit(e.values, () => {
       initialValues.value.genreName = '';
+      e.reset();
     });
   }
 };
