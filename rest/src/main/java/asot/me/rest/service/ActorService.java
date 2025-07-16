@@ -10,13 +10,13 @@ import asot.me.rest.repository.MovieRepository;
 import asot.me.rest.repository.TvShowRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +26,8 @@ public class ActorService {
     private final TvShowRepository tvShowRepository;
     private final ActorMapper actorMapper;
 
-    public List<Actor> getAllActors() {
-        return actorRepository.findAll();
+    public List<ActorDto> getAllActors() {
+        return actorMapper.toDtoList(actorRepository.findAll(Sort.by(Sort.Direction.ASC, "id")));
     }
 
     public ActorDto getActor(Long id) {
@@ -39,6 +39,31 @@ public class ActorService {
     public ActorDto createActor(ActorDto actorDto) {
         Actor actor = actorMapper.toEntity(actorDto);
         return actorMapper.toDTO(actorRepository.save(actor));
+    }
+
+    /**
+     * Updates an existing actor's details.
+     * only the firstname and lastaname are updated.
+     * @param actorDto the actor data transfer object containing updated information
+     * @return the updated actor data transfer object
+     */
+    public ActorDto updateActor(ActorDto actorDto) {
+        Actor actor =  actorRepository.findById(actorDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Actor not found with id: " + actorDto.getId()));
+
+        actor.setFirstname(actorDto.getFirstname());
+        actor.setLastname(actorDto.getLastname());
+
+        return actorMapper.toDTO(actorRepository.save(actor));
+    }
+
+    public void deleteActor(Long id) {
+        Actor actor =  actorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Actor not found with id: " + id));
+        // do not remove movies or tvshows just delete the actor
+        actor.setMovies(null);
+        actor.setTvshows(null);
+        actorRepository.delete(actor);
     }
 
     public ActorDto addActorToMovies(Long actorId, List<Long> movieIds) {

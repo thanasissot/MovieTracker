@@ -1,9 +1,7 @@
 package asot.me.rest.controller;
 
-import asot.me.rest.dom.Actor;
 import asot.me.rest.dto.ActorDto;
 import asot.me.rest.service.ActorService;
-import jakarta.persistence.SequenceGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +15,7 @@ public class ActorController {
     private final ActorService actorService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<Actor>> getAllActors() {
+    public ResponseEntity<List<ActorDto>> getAllActors() {
         return ResponseEntity.ok(actorService.getAllActors());
     }
 
@@ -29,6 +27,18 @@ public class ActorController {
     @PostMapping("/create")
     public ResponseEntity<ActorDto> createActor(@RequestBody ActorDto actorDto) {
         return ResponseEntity.ok(actorService.createActor(actorDto));
+    }
+
+    @PutMapping("/edit")
+    public ResponseEntity<ActorDto> updateActor(@RequestBody ActorDto actorDto) {
+        ActorDto updatedActor = actorService.updateActor(actorDto);
+        return ResponseEntity.ok(updatedActor);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteActor(@PathVariable Long id) {
+        actorService.deleteActor(id);
+        return ResponseEntity.ok().build();
     }
 
     // Add movies to actor

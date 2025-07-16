@@ -1,40 +1,102 @@
-package asot.me.rest.bs;
+package asot.me.rest.service;
 
 import asot.me.rest.dom.*;
 import asot.me.rest.repository.ActorRepository;
 import asot.me.rest.repository.GenreRepository;
 import asot.me.rest.repository.MovieRepository;
 import asot.me.rest.repository.TvShowRepository;
-import jakarta.transaction.Transactional;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-@Component
+@Service
 @RequiredArgsConstructor
 @Log4j2
-public class BootStrap implements CommandLineRunner {
+public class BootStrapService {
     private final GenreRepository genreRepository;
     private final MovieRepository movieRepository;
     private final TvShowRepository tvShowRepository;
     private final ActorRepository actorRepository;
 
-    @Override
-    public void run(String... args) {
+    public void deleteAll() {
+        log.info("Deleting all data from the database...");
+        actorRepository.deleteAll();
+        tvShowRepository.deleteAll();
+        movieRepository.deleteAll();
+        genreRepository.deleteAll();
+        log.info("Successfully deleted all data from the database.");
+    }
+
+    public void deleteByParam(String param) {
+        switch (param) {
+            case "all":
+                deleteAll();
+                break;
+            case "actors":
+                actorRepository.deleteAll();
+                log.info("Successfully deleted all actors from the database.");
+                break;
+            case "movies":
+                movieRepository.deleteAll();
+                log.info("Successfully deleted all movies from the database.");
+                break;
+            case "tvshows":
+                tvShowRepository.deleteAll();
+                log.info("Successfully deleted all TV shows from the database.");
+                break;
+            case "genres":
+                genreRepository.deleteAll();
+                log.info("Successfully deleted all genres from the database.");
+                break;
+            default:
+                log.warn("Unknown parameter: {}", param);
+        }
+    }
+
+    public void deleteByMultiParams(String ...params) {
+        for (String param : params) {
+            switch (param) {
+                case "actors":
+                    actorRepository.deleteAll();
+                    log.info("Successfully deleted all actors from the database.");
+                    break;
+                case "movies":
+                    movieRepository.deleteAll();
+                    log.info("Successfully deleted all movies from the database.");
+                    break;
+                case "tvshows":
+                    tvShowRepository.deleteAll();
+                    log.info("Successfully deleted all TV shows from the database.");
+                    break;
+                case "genres":
+                    genreRepository.deleteAll();
+                    log.info("Successfully deleted all genres from the database.");
+                    break;
+                case "all":
+                    deleteAll();
+                    return;
+                default:
+                    log.warn("Unknown parameter: {}", param);
+            }
+        }
+    }
+
+    public void createAll() {
+        log.info("Creating all data in the database...");
+        run();
+        log.info("Successfully created all data in the database.");
+    }
+
+    private void run() {
         List<Movie> movies = new ArrayList<>();
         List<TvShow> tvShows = new ArrayList<>();
-
-        if (genreRepository.count() == 0) {
-            initializeGenres();
-        } else {
-            log.info("Genres already exist in the database. Skipping initialization.");
-        }
+        initializeGenres();
 
         HashMap<String, Long> genreMap = new HashMap<>();
         for (GenreEnums genreEnums : GenreEnums.values()) {
@@ -43,23 +105,9 @@ public class BootStrap implements CommandLineRunner {
             genreMap.put(genre.getGenreName(), genre.getId());
         }
 
-        if (movieRepository.count() == 0) {
-            movies = initializeMovies(genreMap);
-        } else {
-            log.info("Movies already exist in the database. Skipping initialization.");
-        }
-
-        if (tvShowRepository.count() == 0) {
-            tvShows = initializeTvShows(genreMap);
-        } else {
-            log.info("TV Shows already exist in the database. Skipping initialization.");
-        }
-
-        if (actorRepository.count() == 0) {
-            initializeActors(movies, tvShows);
-        } else {
-            log.info("Actors already exist in the database. Skipping initialization.");
-        }
+        movies = initializeMovies(genreMap);
+        tvShows = initializeTvShows(genreMap);
+        initializeActors(movies, tvShows);
     }
 
     protected void initializeGenres() {
@@ -166,6 +214,12 @@ public class BootStrap implements CommandLineRunner {
 
         actors = actorRepository.saveAll(actors);
 
+    }
+
+    @PostConstruct
+    public void init() {
+        log.info("BootStrapService initialized");
+        run();
     }
 
 

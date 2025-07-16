@@ -1,35 +1,37 @@
 // Base API URL
-const API_URL = 'http://localhost:8080/genres';
+const API_URL = 'http://localhost:8080/actors';
 
-export interface Genre {
+export interface Actor {
     id: number;
-    genreName: string;
+    firstname: string;
+    lastname: string;
 }
 
 // Service class with methods for API operations
-class GenreService {
+class ActorService {
     /**
      * Get all genres
      * @returns Promise with array of genres
      */
-    async getAllGenres(): Promise<Genre[]> {
+    async getAllActors(): Promise<Actor[]> {
         const response = await fetch(`${API_URL}/all`);
         if (!response.ok) {
-            throw new Error('Failed to fetch genres');
+            throw new Error('Failed to fetch Actors');
         }
         return await response.json();
     }
 
     /**
      * Create a new genre
-     * @param genreName - Name of the genre to create
      * @returns Promise with the created genre
+     * @param firstname
+     * @param lastname
      */
-    async createGenre(genreName: string): Promise<Genre> {
+    async createActor(firstname: string, lastname: string): Promise<Actor> {
         const response = await fetch(`${API_URL}/create`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ genreName })
+            body: JSON.stringify({ firstname, lastname })
         });
 
         if (!response.ok) {
@@ -38,31 +40,31 @@ class GenreService {
         return await response.json();
     }
 
-    async updateGenre(genre: Genre): Promise<Genre> {
+    async updateActor(actor: Actor): Promise<Actor> {
         const response = await fetch(`${API_URL}/edit`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(genre)
+            body: JSON.stringify(actor)
         });
 
         if (!response.ok) {
-            throw new Error('Failed to update genre');
+            throw new Error('Failed to update Actor');
         }
         return await response.json();
     }
 
     /**
-     * Delete a genre by id
-     * @param id - ID of the genre to delete
+     * Delete an Actor by id
+     * @param id - ID of the Actor to delete
      * @returns Promise with the delete operation result
      */
-    async deleteGenre(id: number): Promise<void> {
+    async deleteActor(id: number): Promise<void> {
         const response = await fetch(`${API_URL}/${id}`, {
             method: 'DELETE',
         });
 
         if (!response.ok) {
-            throw new Error('Failed to delete genre');
+            throw new Error('Failed to delete Actor');
         }
 
         if (response.status === 200)
@@ -71,4 +73,4 @@ class GenreService {
 }
 
 // Export a single instance of the service
-export default new GenreService();
+export default new ActorService();

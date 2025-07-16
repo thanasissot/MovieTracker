@@ -1,73 +1,3 @@
-<template>
-  <h1>Genre</h1>
-  <Toast />
-  <div class="card">
-    <DataTable
-        :value="genres"
-        removableSort
-        v-model:filters="filters"
-        filterDisplay="row"
-        :loading="loading"
-        :globalFilterFields="['id', 'genreName']"
-        tableStyle="min-width: 24rem"
-        v-model:editingRows="editingRows"
-        editMode="row"
-        @row-edit-save="onRowEditSave"
-    >
-
-      <template #header>
-        <div class="flex justify-end">
-          <IconField>
-            <InputIcon>
-              <i class="pi pi-search" />
-            </InputIcon>
-            <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
-          </IconField>
-        </div>
-      </template>
-      <template #empty> No data found. </template>
-      <template #loading> Loading data. Please wait. </template>
-
-      <Column field="id" header="ID" sortable bodyStyle="text-align:center">
-        <template #body="{ data }">
-          {{ data.id }}
-        </template>
-        <template #filter="{ filterModel, filterCallback }">
-          <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by id" />
-        </template>
-      </Column>
-      <Column field="genreName" header="Genre" sortable bodyStyle="text-align:center">
-        <template #editor="{ data, field }">
-          <InputText v-model="data[field]" fluid />
-        </template>
-        <template #filter="{ filterModel, filterCallback }">
-          <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by genre" />
-        </template>
-      </Column>
-      <Column class="w-24 !text-end">
-        <template #body="{ data }">
-          <ConfirmPopup></ConfirmPopup>
-          <Toast />
-          <Button @click="deleteGenre($event, data)" label="Delete" severity="danger" outlined></Button>
-<!--          <Button icon="pi pi-trash" @click="selectRow(data)" severity="danger" rounded></Button>-->
-        </template>
-      </Column>
-      <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center"></Column>
-    </DataTable>
-  </div>
-
-  <div class="card flex justify-center">
-    <Form v-slot="$form" :resolver="resolver" :initialValues="initialValues" @submit="onFormSubmit" class="flex flex-col gap-4 w-full sm:w-56">
-      <div class="flex flex-col gap-1">
-        <InputText name="genreName" type="text" placeholder="Genre" fluid />
-        <Message v-if="$form.genreName?.invalid" severity="error" size="small" variant="simple">{{ $form.genreName.error?.message }}</Message>
-      </div>
-      <Button type="submit" severity="secondary" label="Submit" />
-    </Form>
-  </div>
-
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
@@ -193,3 +123,73 @@ const onRowEditSave = async (event) => {
 };
 
 </script>
+
+<template>
+  <h1>Genre</h1>
+  <Toast />
+  <div class="card">
+    <DataTable
+        :value="genres"
+        removableSort
+        v-model:filters="filters"
+        filterDisplay="row"
+        :loading="loading"
+        :globalFilterFields="['id', 'genreName']"
+        tableStyle="min-width: 24rem"
+        v-model:editingRows="editingRows"
+        editMode="row"
+        @row-edit-save="onRowEditSave"
+    >
+
+      <template #header>
+        <div class="flex justify-end">
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-search" />
+            </InputIcon>
+            <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
+          </IconField>
+        </div>
+      </template>
+      <template #empty> No data found. </template>
+      <template #loading> Loading data. Please wait. </template>
+
+      <Column field="id" header="ID" sortable bodyStyle="text-align:center">
+        <template #body="{ data }">
+          {{ data.id }}
+        </template>
+        <template #filter="{ filterModel, filterCallback }">
+          <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by id" />
+        </template>
+      </Column>
+      <Column field="genreName" header="Genre" sortable bodyStyle="text-align:center">
+        <template #editor="{ data, field }">
+          <InputText v-model="data[field]" fluid />
+        </template>
+        <template #filter="{ filterModel, filterCallback }">
+          <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by genre" />
+        </template>
+      </Column>
+      <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center"></Column>
+      <Column class="w-24 !text-end">
+        <template #body="{ data }">
+          <ConfirmPopup></ConfirmPopup>
+          <Toast />
+          <Button @click="deleteGenre($event, data)" label="Delete" severity="danger" outlined></Button>
+          <!--          <Button icon="pi pi-trash" @click="selectRow(data)" severity="danger" rounded></Button>-->
+        </template>
+      </Column>
+    </DataTable>
+  </div>
+
+  <div class="card flex justify-center">
+    <Form v-slot="$form" :resolver="resolver" :initialValues="initialValues" @submit="onFormSubmit" class="flex flex-col gap-4 w-full sm:w-56">
+      <div class="flex flex-col gap-1">
+        <InputText name="genreName" type="text" placeholder="Genre" fluid />
+        <Message v-if="$form.genreName?.invalid" severity="error" size="small" variant="simple">{{ $form.genreName.error?.message }}</Message>
+      </div>
+      <Button type="submit" severity="secondary" label="Submit" />
+    </Form>
+  </div>
+
+</template>
