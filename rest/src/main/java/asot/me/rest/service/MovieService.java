@@ -1,12 +1,15 @@
 package asot.me.rest.service;
 
+import asot.me.rest.dom.Actor;
 import asot.me.rest.dom.Genre;
-import asot.me.rest.dom.GenreEnums;
 import asot.me.rest.dom.Movie;
+import asot.me.rest.dto.MovieDto;
+import asot.me.rest.mapper.MovieMapper;
 import asot.me.rest.repository.GenreRepository;
 import asot.me.rest.repository.MovieRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,14 +25,51 @@ public class MovieService {
 
     private final MovieRepository movieRepository;
     private final GenreRepository genreRepository;
+    private final MovieMapper movieMapper;
 
-    public List<Movie> getAllMovies() {
-        return movieRepository.findAll();
+    public List<MovieDto> getAllMovies() {
+        return movieMapper.toDtoList(movieRepository.findAll(Sort.by(Sort.Direction.ASC, "title")));
     }
 
-    public Movie getMovie(Long id) {
-        return movieRepository.findById(id)
+    public MovieDto getMovie(Long id) {
+        return movieMapper.toDTO(movieRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + id)));
+    }
+
+    public MovieDto createMovie(MovieDto movieDto) {
+        if (movieDto.getGenreIds() == null) {
+            movieDto.setGenreIds(new ArrayList<>());
+        }
+        return movieMapper.toDTO(movieRepository.save(movieMapper.toEntity(movieDto)));
+    }
+
+    public MovieDto updateMovie(MovieDto movieDto) {
+        Movie existingMovie = movieRepository.findById(movieDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + movieDto.getId()));
+
+        existingMovie.setTitle(movieDto.getTitle());
+        existingMovie.setYear(movieDto.getYear() != null ? movieDto.getYear() : null);
+
+        return movieMapper.toDTO(movieRepository.save(existingMovie));
+    }
+
+    public void deleteMovie(Long id) {
+        Movie movie = movieRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + id));
+
+        // Remove references from the join table by removing this movie from all actors' collections
+        for (Actor actor : movie.getActors()) {
+            actor.getMovies().remove(movie);
+        }
+
+        // Clear the movie's actors collection
+        movie.setActors(new HashSet<>());
+
+        // Save to update the join table
+        movieRepository.save(movie);
+
+        // Now delete the movie
+        movieRepository.delete(movie);
     }
 
     private List<Long> getGenreIdsByNames(List<String> genreNames) {
@@ -46,16 +86,16 @@ public class MovieService {
     }
 
     @Transactional
-    public Movie updateMovieGenres(Long movieId, List<String> genreNames) {
-        Movie movie = getMovie(movieId);
+    public MovieDto updateMovieGenres(Long movieId, List<String> genreNames) {
+        MovieDto movie = getMovie(movieId);
         List<Long> genreIds = getGenreIdsByNames(genreNames);
         movie.setGenreIds(genreIds);
-        return movieRepository.save(movie);
+        return movieMapper.toDTO(movieRepository.save(movieMapper.toEntity(movie)));
     }
 
     @Transactional
-    public Movie addMovieGenres(Long movieId, List<String> genreNames) {
-        Movie movie = getMovie(movieId);
+    public MovieDto addMovieGenres(Long movieId, List<String> genreNames) {
+        MovieDto movie = getMovie(movieId);
         List<Long> genreIdsToAdd = getGenreIdsByNames(genreNames);
 
         List<Long> currentGenreIds = movie.getGenreIds();
@@ -67,19 +107,19 @@ public class MovieService {
         updatedGenreIds.addAll(genreIdsToAdd);
 
         movie.setGenreIds(new ArrayList<>(updatedGenreIds));
-        return movieRepository.save(movie);
+        return movieMapper.toDTO(movieRepository.save(movieMapper.toEntity(movie)));
     }
 
     @Transactional
-    public Movie removeMovieGenres(Long movieId, List<String> genreNames) {
-        Movie movie = getMovie(movieId);
+    public MovieDto removeMovieGenres(Long movieId, List<String> genreNames) {
+        MovieDto movie = getMovie(movieId);
         List<Long> genreIdsToRemove = getGenreIdsByNames(genreNames);
 
         List<Long> currentGenreIds = movie.getGenreIds();
         if (currentGenreIds != null && !currentGenreIds.isEmpty()) {
             currentGenreIds.removeAll(genreIdsToRemove);
             movie.setGenreIds(currentGenreIds);
-            return movieRepository.save(movie);
+            return movieMapper.toDTO(movieRepository.save(movieMapper.toEntity(movie)));
         }
 
         return movie;

@@ -5,8 +5,8 @@ const API_URL = 'http://localhost:8080/movies';
 export interface Movie {
     id: number;
     title: string;
-    year: number;
-    // Add other movie properties as needed
+    year: number | null;
+    genreIds?: number[];
 }
 
 // Service class with methods for API operations

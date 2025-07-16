@@ -56,7 +56,7 @@
 import { ref } from 'vue';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { z } from 'zod';
-import { Form } from '@primevue/forms';
+import {Form, type FormSubmitEvent} from '@primevue/forms';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
@@ -66,7 +66,7 @@ import movieService from '../service/movieService';
 import { createServiceAdapter } from '../generic-datatable/serviceAdapter';
 import type { Movie } from '../service/movieService.ts';
 
-const initialValues = ref({ title: '', year: new Date().getFullYear() });
+const initialValues = ref({ title: '', year: null });
 const dataTable = ref<{ handleSubmit: (values: any, resetForm: () => void) => void } | null>(null);
 
 // Adapt the movie service to the DataService interface
@@ -87,11 +87,11 @@ const resolver = zodResolver(
     })
 );
 
-const onFormSubmit = (e: { valid: boolean; values: any }) => {
+const onFormSubmit = (e: FormSubmitEvent) => {
   if (e.valid && dataTable.value) {
     dataTable.value.handleSubmit(e.values, () => {
-      initialValues.value.title = '';
-      initialValues.value.year = new Date().getFullYear();
+      initialValues.value = { title: '', year: null }
+      e.reset();
     });
   }
 };
