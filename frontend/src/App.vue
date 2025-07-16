@@ -10,6 +10,8 @@
     <RouterLink to="/">Go to Home</RouterLink>
     <RouterLink to="/genres">Go to Genre</RouterLink>
     <RouterLink to="/actors">Go to Actors</RouterLink>
+    <RouterLink to="/movies">Go to Movies</RouterLink>
+
   </nav>
   <main>
     <RouterView />
