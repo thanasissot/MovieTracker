@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { z } from 'zod';
 import {Form, type FormSubmitEvent} from '@primevue/forms';
@@ -65,7 +65,10 @@ import DataTableComponent from '../generic-datatable/DataTableComponent.vue';
 import movieService from '../service/movieService';
 import { createServiceAdapter } from '../generic-datatable/serviceAdapter';
 import type { Movie } from '../service/movieService.ts';
+import VirtualScroller from 'primevue/virtualscroller';
+import { useGenreStore } from '../stores/genreStore';
 
+const genreStore = useGenreStore();
 const initialValues = ref({ title: '', year: null });
 const dataTable = ref<{ handleSubmit: (values: any, resetForm: () => void) => void } | null>(null);
 
@@ -75,6 +78,11 @@ const movieServiceAdapter = createServiceAdapter<Movie>({
   create: (data: { title: string; year: number }) => movieService.createMovie(data.title, Number(data.year)),
   update: (data: Movie) => movieService.updateMovie(data),
   delete: (id: number) => movieService.deleteMovie(id)
+});
+
+// Load genres on component mount
+onMounted(async () => {
+  await genreStore.loadGenres();
 });
 
 const currentYear = new Date().getFullYear();

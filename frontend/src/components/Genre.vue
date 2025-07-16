@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { z } from 'zod';
 import {Form, type FormSubmitEvent} from '@primevue/forms';
@@ -50,14 +50,21 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Message from 'primevue/message';
 import DataTableComponent from '../generic-datatable/DataTableComponent.vue';
-import genreService from '../service/genreService';
+import genreService, {type Genre} from '../service/genreService';
 import { createServiceAdapter } from '../generic-datatable/serviceAdapter';
+import { useGenreStore } from '../stores/genreStore';
 
+const genreStore = useGenreStore();
 const initialValues = ref({ genreName: '' });
-const dataTable = ref<{ handleSubmit: (values: any, resetForm: () => void) => void } | null>(null);
+const dataTable = ref<{ handleSubmit: (values: any, resetForm: () => void) => void; refreshData: () => Promise<void> } | null>(null);
+
+// Load genres on component mount
+onMounted(async () => {
+  await genreStore.loadGenres();
+});
 
 // Adapt the genre service to the DataService interface
-const genreServiceAdapter = createServiceAdapter({
+const genreServiceAdapter = createServiceAdapter<Genre>({
   getAll: () => genreService.getAllGenres(),
   create: (data) => genreService.createGenre(data.genreName),
   update: (data) => genreService.updateGenre(data),

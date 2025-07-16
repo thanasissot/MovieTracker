@@ -77,6 +77,45 @@ class MovieService {
         if (response.status === 200)
             return Promise.resolve();
     }
+
+    async updateMovieGenres(movieId: number, genreNames: string[]): Promise<Movie> {
+        const response = await fetch(`${API_URL}/${movieId}/genres`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ genreNames })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update movie genres');
+        }
+        return await response.json();
+    }
+
+    async addMovieGenres(movieId: number, genreNames: string[]): Promise<Movie> {
+        const response = await fetch(`${API_URL}/${movieId}/genres`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ genreNames })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add movie genres');
+        }
+        return await response.json();
+    }
+
+    async removeMovieGenres(movieId: number, genreNames: string[]): Promise<Movie> {
+        const response = await fetch(`${API_URL}/${movieId}/genres`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ genreNames })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to remove movie genres');
+        }
+        return await response.json();
+    }
 }
 
 // Export a single instance of the service

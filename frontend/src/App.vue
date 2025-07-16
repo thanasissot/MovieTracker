@@ -1,5 +1,12 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
+import { useGenreStore } from './stores/genreStore';
 
+const genreStore = useGenreStore();
+
+onMounted(async () => {
+  await genreStore.loadGenres();
+});
 
 </script>
 

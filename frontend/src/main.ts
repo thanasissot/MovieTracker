@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import './style.css'
 import App from './App.vue'
 import router from "./route.ts";
@@ -10,6 +11,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 
 
 createApp(App)
+    .use(createPinia())
     .use(ConfirmationService)
     .use(ToastService)
     .use(DialogService)
