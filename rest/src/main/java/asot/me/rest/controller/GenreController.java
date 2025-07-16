@@ -24,6 +24,12 @@ public class GenreController {
         return ResponseEntity.ok(genreService.getGenreById(id));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGenre(@PathVariable Long id) {
+        genreService.deleteGenre(id);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/create")
     public ResponseEntity<GenreDto>createGenre(@RequestBody GenreDto genreDto) {
         GenreDto createdGenre = genreService.createGenre(genreDto);

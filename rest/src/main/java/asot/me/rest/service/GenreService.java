@@ -1,11 +1,11 @@
 package asot.me.rest.service;
 
 import asot.me.rest.dom.Genre;
-import asot.me.rest.dom.GenreEnums;
 import asot.me.rest.dto.GenreDto;
 import asot.me.rest.mapper.GenreMapper;
 import asot.me.rest.repository.GenreRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +18,7 @@ public class GenreService {
     private final GenreMapper genreMapper;
 
     public List<GenreDto> getAllGenres() {
-        return genreMapper.toDtoList(genreRepository.findAll());
+        return genreMapper.toDtoList(genreRepository.findAll(Sort.by(Sort.Direction.ASC, "id")));
     }
 
     public GenreDto getGenreById(Long id) {
@@ -44,6 +44,12 @@ public class GenreService {
         genre.setGenreName(newName);
         genreRepository.save(genre);
         return genreMapper.toDTO(genre);
+    }
+
+    @Transactional
+    public void deleteGenre(Long id) {
+        Genre genre = genreRepository.findById(id).orElseThrow(() -> new RuntimeException("Genre not found with id: " + id));
+        genreRepository.delete(genre);
     }
 
 

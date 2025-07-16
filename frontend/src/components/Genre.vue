@@ -2,11 +2,18 @@
   <h1>Genre</h1>
   <Toast />
   <div class="card">
-    <DataTable :value="genres" removableSort
-               v-model:filters="filters"
-               filterDisplay="row" :loading="loading"
-               :globalFilterFields="['id', 'genreName']"
-               tableStyle="min-width: 24rem">
+    <DataTable
+        :value="genres"
+        removableSort
+        v-model:filters="filters"
+        filterDisplay="row"
+        :loading="loading"
+        :globalFilterFields="['id', 'genreName']"
+        tableStyle="min-width: 24rem"
+        v-model:editingRows="editingRows"
+        editMode="row"
+        @row-edit-save="onRowEditSave"
+    >
 
       <template #header>
         <div class="flex justify-end">
@@ -30,13 +37,22 @@
         </template>
       </Column>
       <Column field="genreName" header="Genre" sortable bodyStyle="text-align:center">
-        <template #body="{ data }">
-          {{ data.genreName }}
+        <template #editor="{ data, field }">
+          <InputText v-model="data[field]" fluid />
         </template>
         <template #filter="{ filterModel, filterCallback }">
           <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by genre" />
         </template>
       </Column>
+      <Column class="w-24 !text-end">
+        <template #body="{ data }">
+          <ConfirmPopup></ConfirmPopup>
+          <Toast />
+          <Button @click="deleteGenre($event, data)" label="Delete" severity="danger" outlined></Button>
+<!--          <Button icon="pi pi-trash" @click="selectRow(data)" severity="danger" rounded></Button>-->
+        </template>
+      </Column>
+      <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center"></Column>
     </DataTable>
   </div>
 
@@ -66,72 +82,114 @@ import { useToast } from "primevue/usetoast";
 import { z } from 'zod';
 import Message from 'primevue/message';
 import { Form } from '@primevue/forms';
-
-
-const API_URL = `http://localhost:8080/genres`;
+import ConfirmPopup from 'primevue/confirmpopup';
+import { useConfirm } from "primevue/useconfirm";
+import Toast from 'primevue/toast';
+import genreService from '../service/genreService';
+import type { Genre } from '../service/genreService';
 
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   id: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
   genreName: { value: null, matchMode: FilterMatchMode.STARTS_WITH }
 });
-
-async function getData() {
-  const response = await fetch(API_URL+'/all');
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
-  return await response.json();
-}
-
-async function createGenre(genreName: string) {
-  const response = await fetch(API_URL+'/create', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},//very important for uri
-      body: JSON.stringify({ genreName: genreName })
-    });
-
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
-  return await response.json();
-}
-
-onMounted(() => {
-  getData().then((data) => {
-    genres.value = data
-    loading.value = false
-  });
-});
-
-const genres = ref();
+const genres = ref<Genre[]>([]);
 const loading = ref(true);
-
+const confirm = useConfirm();
 const toast = useToast();
 const initialValues = ref({
   genreName: '',
 });
+const editingRows = ref([]);
 
 const resolver = ref(zodResolver(
-  z.object({
-    genreName: z.string().min(1, { message: 'genre is required.' }),
-  })
+    z.object({
+      genreName: z.string().min(1, { message: 'genre is required.' }),
+    })
 ));
 
-const onFormSubmit = (e) => {
-  if (e.valid) {
-    loading.value=true;
-    createGenre(e.values.genreName).then(
-      () => {
-        getData().then((data) => {
-          genres.value = data
-          loading.value = false
-          toast.add({ severity: 'success', summary: 'Genre is created', life: 3000 });
-        });
-      }
-    )
+async function loadGenres() {
+  try {
+    loading.value = true;
+    genres.value = await genreService.getAllGenres();
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load genres', life: 3000 });
+    console.error('Error loading genres:', error);
+  } finally {
+    loading.value = false;
   }
-  initialValues.value.genreName = '';
+}
+
+onMounted(() => {
+  loadGenres();
+});
+
+const onFormSubmit = async (e) => {
+  if (e.valid) {
+    try {
+      loading.value = true;
+      await genreService.createGenre(e.values.genreName);
+      await loadGenres();
+      toast.add({ severity: 'success', summary: 'Genre is created', life: 3000 });
+      initialValues.value.genreName = '';
+    } catch (error) {
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create genre', life: 3000 });
+      console.error('Error creating genre:', error);
+    } finally {
+      loading.value = false;
+    }
+  }
+};
+
+const deleteGenre = (event, data: Genre) => {
+  confirm.require({
+    target: event.currentTarget,
+    message: 'Do you want to delete this Genre?',
+    icon: 'pi pi-info-circle',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      outlined: true
+    },
+    acceptProps: {
+      label: 'Delete',
+      severity: 'danger'
+    },
+    accept: async () => {
+      try {
+        loading.value = true;
+        await genreService.deleteGenre(data.id);
+        await loadGenres();
+        toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Genre deleted', life: 3000 });
+      } catch (error) {
+        console.log("error", error)
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete genre', life: 3000 });
+      } finally {
+        loading.value = false;
+      }
+    },
+    reject: () => {
+      toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+    }
+  });
+};
+
+const onRowEditSave = async (event) => {
+  let { newData, index } = event;
+
+  try {
+    loading.value = true;
+    await genreService.updateGenre(newData);
+    await loadGenres();
+    toast.add({ severity: 'success', summary: 'Genre is updated', life: 3000 });
+    initialValues.value.genreName = '';
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update genre', life: 3000 });
+    console.error('Error updating genre:', error);
+  } finally {
+    loading.value = false;
+  }
+
 };
 
 </script>
