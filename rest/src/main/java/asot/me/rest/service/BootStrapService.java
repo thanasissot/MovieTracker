@@ -9,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,6 +88,7 @@ public class BootStrapService {
         }
     }
 
+    @Transactional
     public void createAll() {
         log.info("Creating all data in the database...");
         run();
@@ -205,21 +207,26 @@ public class BootStrapService {
         actors = actorRepository.saveAll(actors);
         log.info("Successfully initialized {} actors records", actors.size());
 
-        actors.get(0).setMovies(movies.subList(0, 2));
-        actors.get(0).setTvshows(tvShows.subList(0, 2));
-        actors.get(1).setMovies(movies.subList(2, 4));
-        actors.get(1).setTvshows(tvShows.subList(2, 4));
-        actors.get(2).setMovies(movies.subList(1, 4));
-        actors.get(2).setTvshows(tvShows.subList(1, 4));
+        // Create new ArrayList instances instead of using subList views directly
+        actors.get(0).setMovies(new ArrayList<>(movies.subList(0, 2)));
+        actors.get(0).setTvshows(new ArrayList<>(tvShows.subList(0, 2)));
+        actors.get(1).setMovies(new ArrayList<>(movies.subList(2, 4)));
+        actors.get(1).setTvshows(new ArrayList<>(tvShows.subList(2, 4)));
+        actors.get(2).setMovies(new ArrayList<>(movies.subList(1, 4)));
+        actors.get(2).setTvshows(new ArrayList<>(tvShows.subList(1, 4)));
 
-        actors = actorRepository.saveAll(actors);
+        actorRepository.saveAll(actors);
 
     }
 
     @PostConstruct
     public void init() {
         log.info("BootStrapService initialized");
-        run();
+        try {
+            run();
+        } catch (Exception e) {
+            log.error("Error during BootStrapService initialization: {}", e.getMessage());
+        }
     }
 
 
