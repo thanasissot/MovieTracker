@@ -3,91 +3,100 @@
   <Toast />
   <ConfirmPopup />
 
-  <div class="card">
-    <DataTable
-        :value="movies"
-        removableSort
-        v-model:filters="filters"
-        filterDisplay="row"
-        :loading="loading"
-        :globalFilterFields="['id', 'title', 'year']"
-        tableStyle="min-width: 24rem"
-        v-model:editingRows="editingRows"
-        editMode="row"
-        @row-edit-save="onRowEditSave"
-        v-model:expandedRows="expandedRows"
-        @rowExpand="onRowExpand"
-        @rowCollapse="onRowCollapse"
-    >
-      <template #header>
-        <div class="flex justify-end">
-          <IconField>
-            <InputIcon>
-              <i class="pi pi-search" />
-            </InputIcon>
-            <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
-          </IconField>
-        </div>
-      </template>
-      <template #empty> No data found. </template>
-      <template #loading> Loading data. Please wait. </template>
-
-      <Column expander style="width: 5rem" header="View Genres"/>
-      <Column field="id" header="ID" sortable bodyStyle="text-align:center">
-        <template #body="{ data }">
-          {{ data.id }}
-        </template>
-        <template #filter="{ filterModel, filterCallback }">
-          <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by id" />
-        </template>
-      </Column>
-      <Column field="title" header="Title" sortable bodyStyle="text-align:center">
-        <template #editor="{ data, field }">
-          <InputText v-model="data[field]" fluid />
-        </template>
-        <template #filter="{ filterModel, filterCallback }">
-          <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by title" />
-        </template>
-      </Column>
-      <Column field="year" header="Year" sortable bodyStyle="text-align:center">
-        <template #editor="{ data, field }">
-          <InputText v-model="data[field]" type="number" fluid />
-        </template>
-        <template #filter="{ filterModel, filterCallback }">
-          <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by year" />
-        </template>
-      </Column>
-      <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center"></Column>
-      <Column class="w-24 !text-end">
-        <template #body="slotProps">
-          <Button @click="confirmDelete($event, slotProps.data)" label="Delete" severity="danger" outlined></Button>
-        </template>
-      </Column>
-      <template #expansion="slotProps">
-        <div class="p-4">
-          <DataTable :value="getMovieGenres(slotProps.data.genreIds)">
-            <Column field="id" header="Id"></Column>
-            <Column field="genreName" header="Genre"></Column>
-          </DataTable>
-        </div>
-      </template>
-    </DataTable>
+  <div class="grid grid-cols-3 grid-rows-3 gap-4">
+    <template v-for="movie in movies" :key="movie.id">
+      <MovieCard
+          :movie="movie"
+          :genres="getMovieGenres(movie.genreIds)"
+      />
+    </template>
   </div>
 
-  <!-- Form for adding new movies -->
-  <div class="card flex justify-center mt-4">
-    <Form v-slot="$form" :resolver="resolver" :initialValues="initialValues" @submit="onFormSubmit" class="flex flex-col gap-4 w-full sm:w-56">
-      <div class="flex flex-col gap-1">
-        <InputText name="title" type="text" placeholder="Title" fluid />
-        <Message v-if="$form.title?.invalid" severity="error" size="small" variant="simple">{{ $form.title.error?.message }}</Message>
-      </div>
-      <div class="flex flex-col gap-1">
-        <InputText name="year" type="number" placeholder="Year" fluid />
-        <Message v-if="$form.year?.invalid" severity="error" size="small" variant="simple">{{ $form.year.error?.message }}</Message>
-      </div>
-      <Button type="submit" severity="secondary" label="Submit" />
-    </Form>
-  </div>
+<!--  <div class="card">-->
+<!--    <DataTable-->
+<!--        :value="movies"-->
+<!--        removableSort-->
+<!--        v-model:filters="filters"-->
+<!--        filterDisplay="row"-->
+<!--        :loading="loading"-->
+<!--        :globalFilterFields="['id', 'title', 'year']"-->
+<!--        tableStyle="min-width: 24rem"-->
+<!--        v-model:editingRows="editingRows"-->
+<!--        editMode="row"-->
+<!--        @row-edit-save="onRowEditSave"-->
+<!--        v-model:expandedRows="expandedRows"-->
+<!--        @rowExpand="onRowExpand"-->
+<!--        @rowCollapse="onRowCollapse"-->
+<!--    >-->
+<!--      <template #header>-->
+<!--        <div class="flex justify-end">-->
+<!--          <IconField>-->
+<!--            <InputIcon>-->
+<!--              <i class="pi pi-search" />-->
+<!--            </InputIcon>-->
+<!--            <InputText v-model="filters['global'].value" placeholder="Keyword Search" />-->
+<!--          </IconField>-->
+<!--        </div>-->
+<!--      </template>-->
+<!--      <template #empty> No data found. </template>-->
+<!--      <template #loading> Loading data. Please wait. </template>-->
+
+<!--      <Column expander style="width: 5rem" header="View Genres"/>-->
+<!--      <Column field="id" header="ID" sortable bodyStyle="text-align:center">-->
+<!--        <template #body="{ data }">-->
+<!--          {{ data.id }}-->
+<!--        </template>-->
+<!--        <template #filter="{ filterModel, filterCallback }">-->
+<!--          <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by id" />-->
+<!--        </template>-->
+<!--      </Column>-->
+<!--      <Column field="title" header="Title" sortable bodyStyle="text-align:center">-->
+<!--        <template #editor="{ data, field }">-->
+<!--          <InputText v-model="data[field]" fluid />-->
+<!--        </template>-->
+<!--        <template #filter="{ filterModel, filterCallback }">-->
+<!--          <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by title" />-->
+<!--        </template>-->
+<!--      </Column>-->
+<!--      <Column field="year" header="Year" sortable bodyStyle="text-align:center">-->
+<!--        <template #editor="{ data, field }">-->
+<!--          <InputText v-model="data[field]" type="number" fluid />-->
+<!--        </template>-->
+<!--        <template #filter="{ filterModel, filterCallback }">-->
+<!--          <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by year" />-->
+<!--        </template>-->
+<!--      </Column>-->
+<!--      <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center"></Column>-->
+<!--      <Column class="w-24 !text-end">-->
+<!--        <template #body="slotProps">-->
+<!--          <Button @click="confirmDelete($event, slotProps.data)" label="Delete" severity="danger" outlined></Button>-->
+<!--        </template>-->
+<!--      </Column>-->
+<!--      <template #expansion="slotProps">-->
+<!--        <div class="p-4">-->
+<!--          <DataTable :value="getMovieGenres(slotProps.data.genreIds)">-->
+<!--            <Column field="id" header="Id"></Column>-->
+<!--            <Column field="genreName" header="Genre"></Column>-->
+<!--          </DataTable>-->
+<!--        </div>-->
+<!--      </template>-->
+<!--    </DataTable>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Form for adding new movies &ndash;&gt;-->
+<!--  <div class="card flex justify-center mt-4">-->
+<!--    <Form v-slot="$form" :resolver="resolver" :initialValues="initialValues" @submit="onFormSubmit" class="flex flex-col gap-4 w-full sm:w-56">-->
+<!--      <div class="flex flex-col gap-1">-->
+<!--        <InputText name="title" type="text" placeholder="Title" fluid />-->
+<!--        <Message v-if="$form.title?.invalid" severity="error" size="small" variant="simple">{{ $form.title.error?.message }}</Message>-->
+<!--      </div>-->
+<!--      <div class="flex flex-col gap-1">-->
+<!--        <InputText name="year" type="number" placeholder="Year" fluid />-->
+<!--        <Message v-if="$form.year?.invalid" severity="error" size="small" variant="simple">{{ $form.year.error?.message }}</Message>-->
+<!--      </div>-->
+<!--      <Button type="submit" severity="secondary" label="Submit" />-->
+<!--    </Form>-->
+<!--  </div>-->
 </template>
 
 <script setup lang="ts">
@@ -109,7 +118,8 @@ import ConfirmPopup from 'primevue/confirmpopup';
 import Toast from 'primevue/toast';
 import movieService, { type Movie } from '../service/movieService.ts';
 import { useGenreStore } from '../stores/genreStore';
-
+import MovieCard from "./MovieCard.vue";
+import type { Genre } from '../service/genreService';
 
 // State
 const movies = ref<Movie[]>([]);
@@ -151,7 +161,9 @@ onMounted(async () => {
 // Helper function to get genre objects for a movie
 const getMovieGenres = (genreIds?: number[]) => {
   if (!genreIds || genreIds.length === 0) return [];
-  return genreIds.map(id => genreStore.getGenreById(id)).filter(Boolean);
+  let genres = genreIds.map(id => genreStore.getGenreById(id)) as Genre[];
+  console.log(genres)
+  return genres;
 };
 
 // Validation
@@ -233,9 +245,11 @@ const confirmDelete = (event: Event, movie: Movie) => {
   });
 };
 
+// @ts-ignore
 const onRowExpand = (event) => {
   toast.add({ severity: 'info', summary: 'Product Expanded', detail: event.data.name, life: 3000 });
 };
+// @ts-ignore
 const onRowCollapse = (event) => {
   toast.add({ severity: 'success', summary: 'Product Collapsed', detail: event.data.name, life: 3000 });
 };

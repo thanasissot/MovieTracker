@@ -10,9 +10,9 @@ declare module 'vue' {
   export interface GlobalComponents {
     Actor: typeof import('./src/components/Actor.vue')['default']
     Genre: typeof import('./src/components/Genre.vue')['default']
-    Genre_old: typeof import('./src/components/Genre_old.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     Movie: typeof import('./src/components/Movie.vue')['default']
+    MovieCard: typeof import('./src/components/MovieCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }
