@@ -116,7 +116,7 @@ public class BootStrapService {
         List<Genre> genres = new ArrayList<>();
         for (GenreEnums genreEnums : GenreEnums.values()) {
             Genre genre = Genre.builder()
-                    .genreName(genreEnums.toString())
+                    .genreName(genreEnums.toString().substring(0, 1).toUpperCase() + genreEnums.toString().substring(1))
                     .build();
             genres.add(genre);
         }
