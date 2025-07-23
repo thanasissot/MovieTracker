@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@handsontable/vue3": "^16.0.1",
-    "handsontable": "^16.0.1"
-  }
-}
