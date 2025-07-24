@@ -13,11 +13,11 @@ public interface GenreMapper {
     // Define methods to map between Genre and GenreDto if needed
     // For example:
     @Mapping(target = "id", source = "genre.id")
-    @Mapping(target = "genreName", source = "genre.genreName")
+    @Mapping(target = "genre", source = "genre.genreName")
     GenreDto toDTO(Genre genre);
 
     @Mapping(target = "id", source = "genreDto.id")
-    @Mapping(target = "genreName", source = "genreDto.genreName")
+    @Mapping(target = "genreName", source = "genreDto.genre")
     Genre toEntity(GenreDto genreDto);
 
     List<GenreDto> toDtoList(List<Genre> genres);

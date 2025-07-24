@@ -14,7 +14,7 @@ import java.util.List;
 public class GenreController {
     private final GenreService genreService;
 
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<List<GenreDto>> getAllGenres() {
         return ResponseEntity.ok(genreService.getAllGenres());
     }
@@ -30,16 +30,28 @@ public class GenreController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<GenreDto>createGenre(@RequestBody GenreDto genreDto) {
+    @PostMapping("/{id}")
+    public ResponseEntity<GenreDto>createGenre(
+            @PathVariable Long id,
+            @RequestBody GenreDto genreDto) {
         GenreDto createdGenre = genreService.createGenre(genreDto);
         return ResponseEntity.ok(createdGenre);
     }
 
-    @PutMapping("/edit")
+
+    @PutMapping("/{id}")
     public ResponseEntity<GenreDto> updateGenreName(
+            @PathVariable Long id,
             @RequestBody GenreDto genreDto) {
-        GenreDto updatedGenre = genreService.updateGenreName(genreDto.getId(), genreDto.getGenreName());
+        GenreDto updatedGenre = genreService.updateGenreName(genreDto.getId(), genreDto.getGenre());
+        return ResponseEntity.ok(updatedGenre);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<GenreDto> patchGenreName(
+            @PathVariable Long id,
+            @RequestBody GenreDto genreDto) {
+        GenreDto updatedGenre = genreService.updateGenreName(id, genreDto.getGenre());
         return ResponseEntity.ok(updatedGenre);
     }
 }

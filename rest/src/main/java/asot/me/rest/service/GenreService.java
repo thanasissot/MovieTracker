@@ -33,7 +33,7 @@ public class GenreService {
 
     @Transactional
     public GenreDto createGenre(GenreDto genreDto) {
-        Genre genre = Genre.builder().genreName(genreDto.getGenreName()).build();
+        Genre genre = Genre.builder().genreName(genreDto.getGenre()).build();
         genreRepository.save(genre);
         return genreMapper.toDTO(genre);
     }

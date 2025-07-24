@@ -19,7 +19,6 @@
     </properties>
     <modules>
         <module>rest</module>
-        <module>ui</module>
     </modules>
 
     <url/>
