@@ -23,11 +23,10 @@ import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { type Movie, type Genre } from "../../components/model/all";
+import { type Movie, type Genre, type Actor } from "../../components/model/all";
 
 export const MovieShow = () => {
   const apiUrl = useApiUrl();
-  const [allGenres, setAllGenres] = useState<Genre[]>([]);
   const [genreOptions, setGenreOptions] = useState<Genre[]>([]);
   const [selectedGenreId, setSelectedGenreId] = useState<number | "">("");
   const [genres, setGenres] = useState<Genre[]>([]);
@@ -38,44 +37,44 @@ export const MovieShow = () => {
 
   // Fetch all genres once
   useEffect(() => {
-    const fetchAllGenres = async () => {
-      try {
-        const response = await axios.get(`${apiUrl}/genres`, {
-          params: {
-            _sort: 'name',
-            _order: 'asc'
-          }
-        });
-        setAllGenres(response.data);
-      } catch (error) {
-        console.error("Error fetching all genres:", error);
-      }
-    };
-
-    fetchAllGenres();
-  }, [apiUrl]);
-
-  // Setup movie genres and available options
-  useEffect(() => {
-    if (record?.genreIds && record.genreIds.length > 0 && allGenres.length > 0) {
-      // Map genre IDs to actual genre objects
-      const movieGenres = record.genreIds
-          .map(id => allGenres.find((genre: Genre) => genre.id === id))
-          .filter(Boolean); // Remove any undefined entries
-
-      setGenres(movieGenres ? movieGenres as Genre[] : []);
-
-      // Update available genre options
-      updateGenreOptions(record.genreIds);
-    } else if (allGenres.length > 0) {
-      setGenres([]);
-      setGenreOptions(allGenres);
+    if (record) {
+      fetchAllGenres().then(r => console.log("Genres fetched"));
     }
-  }, [record, allGenres]);
+  }, [record]);
+
+  const fetchAllGenres = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/genres`, {
+        params: {
+          _sort: 'name',
+          _order: 'asc'
+        }
+      });
+      const tempGenres = response.data as Genre[];
+      console.log(tempGenres);
+      console.log(record);
+      if (record?.genreIds && record.genreIds.length > 0 && tempGenres.length > 0) {
+        console.log(tempGenres);
+        const movieGenres = record.genreIds
+            .map(id => tempGenres.find((genre: Genre) => genre.id === id))
+            .filter(Boolean); // Remove any undefined entries
+
+        setGenres(movieGenres ? movieGenres as Genre[] : []);
+        // Update available genre options
+        updateGenreOptions(record.genreIds, tempGenres);
+      } else if (tempGenres.length > 0) {
+        setGenres([]);
+        setGenreOptions(tempGenres);
+      }
+
+    } catch (error) {
+      console.error("Error fetching all genres:", error);
+    }
+  };
 
   // Helper function to update available genre options
-  const updateGenreOptions = (usedGenreIds: number[]) => {
-    const filteredOptions = allGenres.filter(
+  const updateGenreOptions = (usedGenreIds: number[], tempGenres: Genre[]) => {
+    const filteredOptions = tempGenres.filter(
         genre => !usedGenreIds.includes(genre.id)
     );
     setGenreOptions(filteredOptions);
@@ -114,7 +113,7 @@ export const MovieShow = () => {
         setGenres(updatedGenres);
 
         // Update available options
-        updateGenreOptions(updatedGenres.map(g => g.id));
+        updateGenreOptions(updatedGenres.map(g => g.id), genreOptions);
       }
 
       // Reset selection
@@ -152,6 +151,27 @@ export const MovieShow = () => {
           </Button>
       ),
     },
+  ];
+
+  // Add columns definition for actors
+  const actorColumns: GridColDef[] = [
+    {
+      field: "id",
+      headerName: "ID",
+      width: 80,
+    },
+    {
+      field: "firstname",
+      headerName: "First Name",
+      flex: 1,
+      minWidth: 150,
+    },
+    {
+      field: "lastname",
+      headerName: "Last Name",
+      flex: 1,
+      minWidth: 150,
+    }
   ];
 
   return (
@@ -227,6 +247,31 @@ export const MovieShow = () => {
         ) : (
             <Typography variant="body2" color="text.secondary">
               This movie has not been assigned any genres.
+            </Typography>
+        )}
+
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="h6">Actors</Typography>
+        {record?.actors?.length > 0 ? (
+            <Box sx={{ height: 400, width: '100%' }}>
+              <DataGrid
+                  rows={record.actors}
+                  columns={actorColumns}
+                  disableRowSelectionOnClick
+                  autoHeight
+                  pageSizeOptions={[10, 15, 25]}
+                  initialState={{
+                    pagination: {
+                      paginationModel: { pageSize: 10 },
+                    },
+                  }}
+              />
+            </Box>
+        ) : (
+            <Typography variant="body2" color="text.secondary">
+              This movie has no actors assigned.
             </Typography>
         )}
       </Stack>
