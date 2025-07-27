@@ -32,11 +32,14 @@ public class MovieService {
 
     public Page<MovieDto> getAllMovies(
         Pageable pageable,
-        String titleLike
+        String titleLike,
+        Long genreId
     ) {
         Page<Movie> moviesPage;
 
-        if (titleLike != null && !titleLike.isEmpty()) {
+        if (genreId != null) {
+            moviesPage = movieRepository.findAllByGenreIdsContaining(genreId, pageable);
+        } else if (titleLike != null && !titleLike.isEmpty()) {
             // Search by title containing the given string (case-insensitive)
             moviesPage = movieRepository.findByTitleContainingIgnoreCase(titleLike, pageable);
         } else {

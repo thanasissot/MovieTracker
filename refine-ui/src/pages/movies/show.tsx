@@ -63,7 +63,7 @@ export const MovieShow = () => {
           .map(id => allGenres.find((genre: Genre) => genre.id === id))
           .filter(Boolean); // Remove any undefined entries
 
-      setGenres(movieGenres);
+      setGenres(movieGenres ? movieGenres as Genre[] : []);
 
       // Update available genre options
       updateGenreOptions(record.genreIds);

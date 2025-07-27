@@ -1,8 +1,6 @@
 package asot.me.rest.controller;
 
-import asot.me.rest.dto.GenreDto;
 import asot.me.rest.dto.MovieDto;
-import asot.me.rest.dto.MovieGenresUpdateRequest;
 import asot.me.rest.service.MovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,13 +24,14 @@ public class MovieController {
         @RequestParam(value = "_end", defaultValue = "20") int end,
         @RequestParam(value = "_sort", defaultValue = "title") String sort,
         @RequestParam(value = "_order", defaultValue = "asc") String order,
-        @RequestParam(value = "title_like", required = false) String titleLike
+        @RequestParam(value = "title_like", required = false) String titleLike,
+        @RequestParam(value = "genreId", required = false) Long genreId
     ) {
         int size = end - start;
         int page = start / size;
         Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
-        Page<MovieDto> pageResult = movieService.getAllMovies(pageable, titleLike);
+        Page<MovieDto> pageResult = movieService.getAllMovies(pageable, titleLike, genreId);
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(pageResult.getTotalElements()))
                 .body(pageResult.getContent());

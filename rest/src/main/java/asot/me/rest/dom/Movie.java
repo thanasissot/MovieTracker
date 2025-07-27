@@ -1,13 +1,13 @@
 package asot.me.rest.dom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.Type;
 
 import java.util.HashSet;
 import java.util.List;
@@ -25,8 +25,9 @@ public class Movie {
     private String title;
     private Long year;
 
-    @Column(columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "bigint[]")
+    @Type(ListArrayType.class)
+//    @JdbcTypeCode(SqlTypes.JSON)
     private List<Long> genreIds;
 
     @JsonIgnore
