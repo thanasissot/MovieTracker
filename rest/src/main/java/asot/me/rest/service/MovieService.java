@@ -30,9 +30,19 @@ public class MovieService {
     private final MovieMapper movieMapper;
 
     public Page<MovieDto> getAllMovies(
-        Pageable pageable
+        Pageable pageable,
+        String titleLike
     ) {
-        Page<Movie> moviesPage = movieRepository.findAll(pageable);
+        Page<Movie> moviesPage;
+
+        if (titleLike != null && !titleLike.isEmpty()) {
+            // Search by title containing the given string (case-insensitive)
+            moviesPage = movieRepository.findByTitleContainingIgnoreCase(titleLike, pageable);
+        } else {
+            // Default pagination without filtering
+            moviesPage = movieRepository.findAll(pageable);
+        }
+
         return moviesPage.map(movieMapper::toDTO);
     }
 

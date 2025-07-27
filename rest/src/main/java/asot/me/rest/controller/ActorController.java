@@ -71,15 +71,23 @@ public class ActorController {
         return ResponseEntity.ok(updatedActor);
     }
 
+    // Add movies to actor
+    @PostMapping("/{id}/movies")
+    public ResponseEntity<ActorDto> addMoviesToActor(
+            @PathVariable Long id,
+            @RequestBody List<Long> movieIds) {
+        return ResponseEntity.ok(actorService.addActorToMovies(id, movieIds));
+    }
+
+    // Remove movies from actor
+    @DeleteMapping("/{id}/movies")
+    public ResponseEntity<ActorDto> removeMoviesFromActor(
+            @PathVariable Long id,
+            @RequestBody List<Long> movieIds) {
+        return ResponseEntity.ok(actorService.removeActorFromMovies(id, movieIds));
+    }
 
 
-//    // Add movies to actor
-//    @PostMapping("/{id}/movies")
-//    public ResponseEntity<ActorDto> addMoviesToActor(
-//            @PathVariable Long id,
-//            @RequestBody List<Long> movieIds) {
-//        return ResponseEntity.ok(actorService.addActorToMovies(id, movieIds));
-//    }
 //
 //    // Add TV shows to actor
 //    @PostMapping("/{id}/tvshows")
@@ -89,13 +97,7 @@ public class ActorController {
 //        return ResponseEntity.ok(actorService.addActorToTvshows(id, tvShowIds));
 //    }
 //
-//    // Remove movies from actor
-//    @DeleteMapping("/{id}/movies")
-//    public ResponseEntity<ActorDto> removeMoviesFromActor(
-//            @PathVariable Long id,
-//            @RequestBody List<Long> movieIds) {
-//        return ResponseEntity.ok(actorService.removeActorFromMovies(id, movieIds));
-//    }
+
 //
 //    // Remove TV shows from actor
 //    @DeleteMapping("/{id}/tvshows")

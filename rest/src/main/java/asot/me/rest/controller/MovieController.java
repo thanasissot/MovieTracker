@@ -24,14 +24,15 @@ public class MovieController {
     public ResponseEntity<List<MovieDto>> getAllMovies(
         @RequestParam(value = "_start", defaultValue = "0") int start,
         @RequestParam(value = "_end", defaultValue = "20") int end,
-        @RequestParam(value = "_sort", defaultValue = "id") String sort,
-        @RequestParam(value = "_order", defaultValue = "asc") String order
+        @RequestParam(value = "_sort", defaultValue = "title") String sort,
+        @RequestParam(value = "_order", defaultValue = "asc") String order,
+        @RequestParam(value = "title_like", required = false) String titleLike
     ) {
         int size = end - start;
         int page = start / size;
         Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
-        Page<MovieDto> pageResult = movieService.getAllMovies(pageable);
+        Page<MovieDto> pageResult = movieService.getAllMovies(pageable, titleLike);
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(pageResult.getTotalElements()))
                 .body(pageResult.getContent());
