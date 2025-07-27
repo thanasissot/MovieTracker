@@ -1,18 +1,58 @@
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { useMany } from "@refinedev/core";
 import {
-  DateField,
   DeleteButton,
   EditButton,
   List,
   ShowButton,
   useDataGrid,
 } from "@refinedev/mui";
-import { Typography } from "@mui/material";
-import React from "react";
+import {  useList } from "@refinedev/core";
+import { FormControl, InputLabel, Select, MenuItem, Box, TextField, InputAdornment, IconButton } from "@mui/material";
+import ClearIcon from '@mui/icons-material/Clear';
+import React, { useState, useEffect, useMemo } from "react";
 
 export const ActorList = () => {
-  const { dataGridProps } = useDataGrid({});
+    const [movieId, setMovieId] = useState<number | null>(null);
+    const [movieSearch, setMovieSearch] = useState("");
+
+    const { dataGridProps } = useDataGrid({
+        filters: {
+            permanent: [
+                {
+                    field: "movieId",
+                    operator: "eq",
+                    value: movieId,
+                },
+            ],
+        },
+    });
+
+    const { data: moviesData } = useList({
+        resource: "movies",
+    });
+
+    const allMovies = moviesData?.data || [];
+
+    // Filter movies based on search input
+    const filteredMovies = useMemo(() => {
+        if (!movieSearch) return allMovies;
+
+        return allMovies.filter((movie) =>
+            movie.title?.toLowerCase().includes(movieSearch.toLowerCase())
+        );
+    }, [allMovies, movieSearch]);
+
+    const handleMovieChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        setMovieId(event.target.value as number | null);
+    };
+
+    const handleMovieSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setMovieSearch(event.target.value);
+    };
+
+    const handleClearSearch = () => {
+        setMovieSearch("");
+    };
 
   const columns = React.useMemo<GridColDef[]>(
     () => [
@@ -61,6 +101,48 @@ export const ActorList = () => {
 
   return (
     <List>
+        <Box display="flex" flexDirection="column" gap={2}>
+            <TextField
+                label="Search Movies"
+                variant="outlined"
+                value={movieSearch}
+                onChange={handleMovieSearchChange}
+                fullWidth
+                InputProps={{
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            {movieSearch && (
+                                <IconButton
+                                    aria-label="clear search"
+                                    onClick={handleClearSearch}
+                                    edge="end"
+                                >
+                                    <ClearIcon />
+                                </IconButton>
+                            )}
+                        </InputAdornment>
+                    ),
+                }}
+            />
+            <FormControl fullWidth variant="outlined">
+                <InputLabel id="movie-select-label">Filter by Movie</InputLabel>
+                <Select
+                    labelId="movie-select-label"
+                    value={movieId || ""}
+                    onChange={handleMovieChange}
+                    label="Filter by Movie"
+                >
+                    <MenuItem value="">
+                        <em>All Actors</em>
+                    </MenuItem>
+                    {filteredMovies.map((movie) => (
+                        <MenuItem key={movie.id} value={movie.id}>
+                            {movie.title || `Movie ${movie.id}`}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+        </Box>
       <DataGrid {...dataGridProps} columns={columns} />
     </List>
   );

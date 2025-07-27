@@ -184,7 +184,7 @@ const onFormSubmit = async (e: FormSubmitEvent) => {
       loading.value = true;
       await movieService.createMovie(e.values.title, Number(e.values.year));
       await loadMovies();
-      toast.add({ severity: 'success', summary: 'Success', detail: 'Movie created', life: 3000 });
+      toast.add({ severity: 'success', summary: 'Success', detail: 'All created', life: 3000 });
       initialValues.value = { title: '', year: null };
       e.reset();
     } catch (error) {
@@ -202,7 +202,7 @@ const onRowEditSave = async (event: { newData: Movie }) => {
     loading.value = true;
     await movieService.updateMovie(event.newData);
     await loadMovies();
-    toast.add({ severity: 'success', summary: 'Success', detail: 'Movie updated', life: 3000 });
+    toast.add({ severity: 'success', summary: 'Success', detail: 'All updated', life: 3000 });
   } catch (error) {
     toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update movie', life: 3000 });
     console.error('Error updating movie:', error);
@@ -231,7 +231,7 @@ const confirmDelete = (event: Event, movie: Movie) => {
         loading.value = true;
         await movieService.deleteMovie(movie.id);
         await loadMovies();
-        toast.add({ severity: 'success', summary: 'Success', detail: 'Movie deleted', life: 3000 });
+        toast.add({ severity: 'success', summary: 'Success', detail: 'All deleted', life: 3000 });
       } catch (error) {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete movie', life: 3000 });
         console.error('Error deleting movie:', error);

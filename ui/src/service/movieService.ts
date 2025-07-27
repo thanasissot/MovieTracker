@@ -44,7 +44,7 @@ class MovieService {
 
     /**
      * Update a movie
-     * @param movie - Movie data to update
+     * @param movie - All data to update
      * @returns Promise with the updated movie
      */
     async updateMovie(movie: Movie): Promise<Movie> {

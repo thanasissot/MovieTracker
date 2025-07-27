@@ -32,6 +32,11 @@ public class ActorService {
         return actorsPage.map(actorMapper::toDTO);
     }
 
+    public Page<ActorDto> getAllActorsByMovie(Long movieId, Pageable pageable) {
+        Page<Actor> actors = actorRepository.findByMoviesId(movieId, pageable);
+        return actors.map(actorMapper::toDTO);
+    }
+
     public ActorDto getActor(Long id) {
         Actor actor =  actorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Actor not found with id: " + id));

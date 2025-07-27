@@ -3,6 +3,7 @@ package asot.me.rest.controller;
 import asot.me.rest.dto.ActorDto;
 import asot.me.rest.service.ActorService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/actors")
 @RequiredArgsConstructor
+@Log4j2
 public class ActorController {
     private final ActorService actorService;
 
@@ -23,13 +25,21 @@ public class ActorController {
         @RequestParam(value = "_start", defaultValue = "0") int start,
         @RequestParam(value = "_end", defaultValue = "20") int end,
         @RequestParam(value = "_sort", defaultValue = "id") String sort,
-        @RequestParam(value = "_order", defaultValue = "asc") String order
+        @RequestParam(value = "_order", defaultValue = "asc") String order,
+        @RequestParam(value = "movieId", required = false) Long movieId
     ) {
         int size = end - start;
         int page = start / size;
         Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
-        Page<ActorDto> pageResult = actorService.getAllActors(pageable);
+        Page<ActorDto> pageResult;
+        if (movieId != null) {
+            log.info("Fetching actors for movie with ID: {}", movieId);
+            pageResult = actorService.getAllActorsByMovie(movieId, pageable);
+        } else {
+            log.info("Fetching actors WITHOUT movie id filter");
+            pageResult = actorService.getAllActors(pageable);
+        }
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(pageResult.getTotalElements()))
                 .body(pageResult.getContent());

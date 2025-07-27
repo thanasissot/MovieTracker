@@ -1,31 +1,15 @@
-import { TextField, Stack, Select, Autocomplete, Typography, Divider, Box, Table, TableBody, TableCell, TableContainer, TableRow, Paper, Button } from "@mui/material";
+import { TextField, Stack, Autocomplete, Typography, Divider, Box, Table, TableBody, TableCell, TableContainer, TableRow, Paper, Button } from "@mui/material";
 import { useShow } from "@refinedev/core";
 import {
   Show,
 } from "@refinedev/mui";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import MenuItem from "@mui/material/MenuItem";
-import { Edit, useAutocomplete } from "@refinedev/mui";
-import { useForm } from "@refinedev/react-hook-form";
-import { useCustom, useApiUrl } from "@refinedev/core";
+import {DataGrid, GridColDef, GridRenderCellParams} from "@mui/x-data-grid";
+import { useApiUrl } from "@refinedev/core";
 import React from "react";
-import { Controller } from "react-hook-form";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import axios from "axios";
 import { useState, useEffect } from "react";
-
-interface Movie {
-  id: number;
-  title: string;
-  year: number;
-}
-
-interface Actor {
-  id: number;
-  firstname: string;
-  lastname: string;
-  movies: Movie[];
-}
+import { Movie, Actor } from "../../components/model/all";
 
 export const ActorShow = () => {
   const apiUrl = useApiUrl();
@@ -44,6 +28,12 @@ export const ActorShow = () => {
     }
   }, [record]);
 
+  const filteredMovies = (response: any) : Movie[] => {
+      return response.data.filter((movie: Movie) =>
+        !movies.some(m => m.id === movie.id)
+      );
+  };
+
   // Load default movies for dropdown
   const fetchDefaultMovies = async () => {
     try {
@@ -55,7 +45,7 @@ export const ActorShow = () => {
           _end: 20
         }
       });
-      setMovieOptions(response.data);
+      setMovieOptions(filteredMovies(response));
     } catch (error) {
       console.error("Error fetching default movies:", error);
     }
@@ -79,7 +69,7 @@ export const ActorShow = () => {
               _end: 20
             }
           });
-          setMovieOptions(response.data);
+          setMovieOptions(filteredMovies(response));
         } catch (error) {
           console.error("Error fetching movies:", error);
         }
