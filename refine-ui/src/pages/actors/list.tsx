@@ -27,20 +27,18 @@ export const ActorList = () => {
         },
     });
 
-    const { data: moviesData } = useList({
+    const { data: moviesData, refetch: refetchMovies } = useList({
         resource: "movies",
+        filters: [
+            {
+                field: "title",
+                operator: "contains",
+                value: movieSearch.length > 0 ? movieSearch : undefined,
+            }
+        ],
     });
 
-    const allMovies = moviesData?.data || [];
-
-    // Filter movies based on search input
-    const filteredMovies = useMemo(() => {
-        if (!movieSearch) return allMovies;
-
-        return allMovies.filter((movie) =>
-            movie.title?.toLowerCase().includes(movieSearch.toLowerCase())
-        );
-    }, [allMovies, movieSearch]);
+    const movies = moviesData?.data || [];
 
     const handleMovieChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         setMovieId(event.target.value as number | null);
@@ -53,6 +51,15 @@ export const ActorList = () => {
     const handleClearSearch = () => {
         setMovieSearch("");
     };
+
+    // Debounced refetch to avoid too many requests while typing
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            refetchMovies();
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [movieSearch, refetchMovies]);
 
   const columns = React.useMemo<GridColDef[]>(
     () => [
@@ -135,7 +142,7 @@ export const ActorList = () => {
                     <MenuItem value="">
                         <em>All Actors</em>
                     </MenuItem>
-                    {filteredMovies.map((movie) => (
+                    {movies.map((movie) => (
                         <MenuItem key={movie.id} value={movie.id}>
                             {movie.title || `Movie ${movie.id}`}
                         </MenuItem>
