@@ -93,7 +93,7 @@ export const MovieShow = () => {
       setGenres(updatedGenres);
 
       // Update available options
-      updateGenreOptions(updatedGenres.map(g => g.id));
+      updateGenreOptions(updatedGenres.map(g => g.id), genreOptions);
     } catch (error) {
       console.error("Error removing genre:", error);
     }
