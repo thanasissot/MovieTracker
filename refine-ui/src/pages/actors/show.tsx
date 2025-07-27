@@ -28,10 +28,11 @@ export const ActorShow = () => {
     }
   }, [record]);
 
-  const filteredMovies = (response: any) : Movie[] => {
-      return response.data.filter((movie: Movie) =>
-        !movies.some(m => m.id === movie.id)
-      );
+  const filterMovieOptions = (allMovies: Movie[]): Movie[] => {
+    if (!movies.length) return allMovies;
+    return allMovies.filter(movie =>
+        !movies.some(existingMovie => existingMovie.id === movie.id)
+    );
   };
 
   // Load default movies for dropdown
@@ -45,7 +46,7 @@ export const ActorShow = () => {
           _end: 20
         }
       });
-      setMovieOptions(filteredMovies(response));
+      setMovieOptions(filterMovieOptions(response.data));
     } catch (error) {
       console.error("Error fetching default movies:", error);
     }
@@ -53,7 +54,7 @@ export const ActorShow = () => {
 
   useEffect(() => {
     fetchDefaultMovies();
-  }, []);
+  }, [movies]);
 
   // Search movies as user types
   useEffect(() => {
@@ -69,7 +70,7 @@ export const ActorShow = () => {
               _end: 20
             }
           });
-          setMovieOptions(filteredMovies(response));
+          setMovieOptions(filterMovieOptions(response.data));
         } catch (error) {
           console.error("Error fetching movies:", error);
         }
@@ -81,7 +82,7 @@ export const ActorShow = () => {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [searchText, apiUrl]);
+  }, [searchText, apiUrl, movies]);
 
   const handleRemoveMovie = async (movieId: number) => {
     if (!record?.id) return;
@@ -93,7 +94,6 @@ export const ActorShow = () => {
 
       // Update local state
       setMovies(movies.filter(movie => movie.id !== movieId));
-      await fetchDefaultMovies();
     } catch (error) {
       console.error("Error removing movie:", error);
     }
@@ -113,7 +113,6 @@ export const ActorShow = () => {
       // Reset selection
       setSelectedMovie(null);
       setSearchText("");
-      await fetchDefaultMovies();
     } catch (error) {
       console.error("Error adding movie:", error);
     }
@@ -192,7 +191,7 @@ export const ActorShow = () => {
                 setSearchText(newInputValue);
               }}
               options={movieOptions}
-              getOptionLabel={(option) => `${option.title} (${option.year})`}
+              getOptionLabel={(option) => `${option.title}`}
               renderInput={(params) => (
                   <TextField
                       {...params}
