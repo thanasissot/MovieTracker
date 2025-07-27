@@ -3,7 +3,6 @@ package asot.me.rest.service;
 import asot.me.rest.dom.Actor;
 import asot.me.rest.dom.Genre;
 import asot.me.rest.dom.Movie;
-import asot.me.rest.dto.GenreDto;
 import asot.me.rest.dto.MovieDto;
 import asot.me.rest.mapper.MovieMapper;
 import asot.me.rest.repository.GenreRepository;
@@ -12,7 +11,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,12 +31,17 @@ public class MovieService {
     public Page<MovieDto> getAllMovies(
         Pageable pageable,
         String titleLike,
-        Long genreId
+        Long genreId,
+        Long actorId
     ) {
         Page<Movie> moviesPage;
 
-        if (genreId != null) {
+        if (genreId != null && actorId != null) {
+            moviesPage = movieRepository.findByGenreIdAndActorId(genreId, actorId, pageable);
+        } else if (genreId != null) {
             moviesPage = movieRepository.findAllByGenreIdsContaining(genreId, pageable);
+        } else if (actorId != null) {
+            moviesPage = movieRepository.findAllByActors_Id(actorId, pageable);
         } else if (titleLike != null && !titleLike.isEmpty()) {
             // Search by title containing the given string (case-insensitive)
             moviesPage = movieRepository.findByTitleContainingIgnoreCase(titleLike, pageable);

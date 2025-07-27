@@ -26,7 +26,8 @@ public class ActorController {
         @RequestParam(value = "_end", defaultValue = "20") int end,
         @RequestParam(value = "_sort", defaultValue = "id") String sort,
         @RequestParam(value = "_order", defaultValue = "asc") String order,
-        @RequestParam(value = "movieId", required = false) Long movieId
+        @RequestParam(value = "movieId", required = false) Long movieId,
+        @RequestParam(value = "name_like", required = false) String name
     ) {
         int size = end - start;
         int page = start / size;
@@ -38,7 +39,7 @@ public class ActorController {
             pageResult = actorService.getAllActorsByMovie(movieId, pageable);
         } else {
             log.info("Fetching actors WITHOUT movie id filter");
-            pageResult = actorService.getAllActors(pageable);
+            pageResult = actorService.getAllActors(name, pageable);
         }
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(pageResult.getTotalElements()))

@@ -27,8 +27,14 @@ public class ActorService {
     private final TvShowRepository tvShowRepository;
     private final ActorMapper actorMapper;
 
-    public Page<ActorDto> getAllActors(Pageable pageable) {
-        Page<Actor> actorsPage = actorRepository.findAll(pageable);
+    public Page<ActorDto> getAllActors(String name, Pageable pageable) {
+        Page<Actor> actorsPage = null;
+        if (name == null) {
+            actorsPage = actorRepository.findAll(pageable);
+        } else {
+            actorsPage = actorRepository.findByFirstnameContainingIgnoreCaseOrLastnameContainingIgnoreCase(name, name, pageable);
+        }
+
         return actorsPage.map(actorMapper::toDTO);
     }
 

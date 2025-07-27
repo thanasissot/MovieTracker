@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ActorRepository extends JpaRepository<Actor, Long> {
     Page<Actor> findByMoviesId(Long movieId, Pageable pageable);
+
+    Page<Actor> findByFirstnameContainingIgnoreCaseOrLastnameContainingIgnoreCase(String firstname, String lastname, Pageable pageable);
 }
