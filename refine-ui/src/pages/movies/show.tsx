@@ -8,7 +8,7 @@ import {
   TextFieldComponent as TextField,
 } from "@refinedev/mui";
 
-export const GenreShow = () => {
+export const MovieShow = () => {
   const { query } = useShow({});
 
   const { data, isLoading } = query;
@@ -24,10 +24,14 @@ export const GenreShow = () => {
         <TextField value={record?.id} />
 
         <Typography variant="body1" fontWeight="bold">
-          {"Genre"}
+          {"Title"}
         </Typography>
-        <TextField value={record?.name} />
+        <TextField value={record?.title} />
 
+        <Typography variant="body1" fontWeight="bold">
+          {"Year"}
+        </Typography>
+        <TextField value={record?.title} />
       </Stack>
     </Show>
   );

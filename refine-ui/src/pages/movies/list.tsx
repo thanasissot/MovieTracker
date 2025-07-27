@@ -8,21 +8,22 @@ import {
   ShowButton,
   useDataGrid,
 } from "@refinedev/mui";
+import { Typography } from "@mui/material";
 import React from "react";
 
-export const GenreList = () => {
+export const MovieList = () => {
   const { dataGridProps } = useDataGrid({});
 
-  const { data: genreData, isLoading: genreIsLoading } = useMany({
-    resource: "genres",
-    ids:
-      dataGridProps?.rows
-        ?.map((item: any) => item?.id)
-        .filter(Boolean) ?? [],
-    queryOptions: {
-      enabled: !!dataGridProps?.rows,
-    },
-  });
+    const { data: movieData, isLoading: movieIsLoading } = useMany({
+        resource: "movies",
+        ids:
+            dataGridProps?.rows
+                ?.map((item: any) => item?.id)
+                .filter(Boolean) ?? [],
+        queryOptions: {
+            enabled: !!dataGridProps?.rows,
+        },
+    });
 
   const columns = React.useMemo<GridColDef[]>(
     () => [
@@ -36,8 +37,14 @@ export const GenreList = () => {
         headerAlign: "left",
       },
       {
-        field: "name",
-        headerName: "Genre",
+        field: "title",
+        headerName: "Title",
+        minWidth: 200,
+        display: "flex",
+      },
+      {
+        field: "year",
+        headerName: "Year",
         minWidth: 200,
         display: "flex",
       },
@@ -60,7 +67,7 @@ export const GenreList = () => {
         },
       },
     ],
-    [genreData, genreIsLoading]
+    [movieData, movieIsLoading]
   );
 
   return (

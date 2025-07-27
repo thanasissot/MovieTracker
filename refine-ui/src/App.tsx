@@ -41,6 +41,8 @@ import { AppIcon } from "./components/app-icon";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 import { Header } from "./components/header";
 import {GenreCreate, GenreEdit, GenreList, GenreShow} from "./pages/genre";
+import {MovieCreate, MovieEdit, MovieList, MovieShow} from "./pages/movies";
+import {ActorCreate, ActorEdit, ActorList, ActorShow} from "./pages/actors";
 
 function App() {
   return (
@@ -87,6 +89,26 @@ function App() {
                       canDelete: true,
                     },
                   },
+                  {
+                    name: "movies",
+                    list: "/movies",
+                    create: "/movies/create",
+                    edit: "/movies/edit/:id",
+                    show: "/movies/show/:id",
+                    meta: {
+                      canDelete: true,
+                    },
+                  },
+                  {
+                    name: "actors",
+                    list: "/actors",
+                    create: "/actors/create",
+                    edit: "/actors/edit/:id",
+                    show: "/actors/show/:id",
+                    meta: {
+                      canDelete: true,
+                    },
+                  },
                 ]}
                 options={{
                   syncWithLocation: true,
@@ -126,6 +148,19 @@ function App() {
                       <Route path="edit/:id" element={<GenreEdit />} />
                       <Route path="show/:id" element={<GenreShow />} />
                     </Route>
+                    <Route path="/movies">
+                      <Route index element={<MovieList />} />
+                      <Route path="create" element={<MovieCreate />} />
+                      <Route path="edit/:id" element={<MovieEdit />} />
+                      <Route path="show/:id" element={<MovieShow />} />
+                    </Route>
+                    <Route path="/actors">
+                      <Route index element={<ActorList />} />
+                      <Route path="create" element={<ActorCreate />} />
+                      <Route path="edit/:id" element={<ActorEdit />} />
+                      <Route path="show/:id" element={<ActorShow />} />
+                    </Route>
+
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
                 </Routes>

@@ -9,6 +9,8 @@ import asot.me.rest.repository.GenreRepository;
 import asot.me.rest.repository.MovieRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +29,11 @@ public class MovieService {
     private final GenreRepository genreRepository;
     private final MovieMapper movieMapper;
 
-    public List<MovieDto> getAllMovies() {
-        return movieMapper.toDtoList(movieRepository.findAll(Sort.by(Sort.Direction.ASC, "title")));
+    public Page<MovieDto> getAllMovies(
+        Pageable pageable
+    ) {
+        Page<Movie> moviesPage = movieRepository.findAll(pageable);
+        return moviesPage.map(movieMapper::toDTO);
     }
 
     public MovieDto getMovie(Long id) {
@@ -43,9 +48,9 @@ public class MovieService {
         return movieMapper.toDTO(movieRepository.save(movieMapper.toEntity(movieDto)));
     }
 
-    public MovieDto updateMovie(MovieDto movieDto) {
-        Movie existingMovie = movieRepository.findById(movieDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + movieDto.getId()));
+    public MovieDto updateMovie(Long id, MovieDto movieDto) {
+        Movie existingMovie = movieRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + id));
 
         existingMovie.setTitle(movieDto.getTitle());
         existingMovie.setYear(movieDto.getYear() != null ? movieDto.getYear() : null);
@@ -74,7 +79,7 @@ public class MovieService {
 
     private List<Long> getGenreIdsByNames(List<String> genreNames) {
 
-        List<Genre> genres = genreRepository.findByGenreNameIn(genreNames);
+        List<Genre> genres = genreRepository.findByNameIn(genreNames);
 
         if (genres.size() != genreNames.size()) {
             throw new IllegalArgumentException("Some genres could not be found");

@@ -102,9 +102,9 @@ public class BootStrapService {
 
         HashMap<String, Long> genreMap = new HashMap<>();
         for (GenreEnums genreEnums : GenreEnums.values()) {
-            Genre genre = genreRepository.findByGenreName(genreEnums.toString())
+            Genre genre = genreRepository.findByName(genreEnums.toString())
                     .orElseThrow(() -> new RuntimeException("Genre not found: " + genreEnums));
-            genreMap.put(genre.getGenreName(), genre.getId());
+            genreMap.put(genre.getName(), genre.getId());
         }
 
         movies = initializeMovies(genreMap);
@@ -116,7 +116,7 @@ public class BootStrapService {
         List<Genre> genres = new ArrayList<>();
         for (GenreEnums genreEnums : GenreEnums.values()) {
             Genre genre = Genre.builder()
-                    .genreName(genreEnums.toString().substring(0, 1).toUpperCase() + genreEnums.toString().substring(1))
+                    .name(genreEnums.toString().substring(0, 1).toUpperCase() + genreEnums.toString().substring(1))
                     .build();
             genres.add(genre);
         }

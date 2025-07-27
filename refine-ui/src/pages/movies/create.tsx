@@ -4,7 +4,7 @@ import { useForm } from "@refinedev/react-hook-form";
 import React from "react";
 import { Controller } from "react-hook-form";
 
-export const GenreCreate = () => {
+export const MovieCreate = () => {
   const {
     saveButtonProps,
     refineCore: { formLoading },
@@ -14,7 +14,7 @@ export const GenreCreate = () => {
   } = useForm({});
 
   const { autocompleteProps: categoryAutocompleteProps } = useAutocomplete({
-    resource: "genres",
+    resource: "movies",
   });
 
   return (
@@ -25,17 +25,30 @@ export const GenreCreate = () => {
         autoComplete="off"
       >
         <TextField
-          {...register("name", {
+          {...register("title", {
             required: "This field is required",
           })}
-          error={!!(errors as any)?.name}
-          helperText={(errors as any)?.name?.message}
+          error={!!(errors as any)?.title}
+          helperText={(errors as any)?.title?.message}
           margin="normal"
           fullWidth
           InputLabelProps={{ shrink: true }}
           type="text"
-          label={"Genre"}
-          name="name"
+          label={"Title"}
+          name="title"
+        />
+        <TextField
+          {...register("year", {
+            required: "This field is required",
+          })}
+          error={!!(errors as any)?.year}
+          helperText={(errors as any)?.year?.message}
+          margin="normal"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+          multiline
+          label={"Year"}
+          name="year"
         />
       </Box>
     </Create>

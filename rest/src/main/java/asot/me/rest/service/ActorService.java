@@ -10,7 +10,8 @@ import asot.me.rest.repository.MovieRepository;
 import asot.me.rest.repository.TvShowRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,8 +27,9 @@ public class ActorService {
     private final TvShowRepository tvShowRepository;
     private final ActorMapper actorMapper;
 
-    public List<ActorDto> getAllActors() {
-        return actorMapper.toDtoList(actorRepository.findAll(Sort.by(Sort.Direction.ASC, "id")));
+    public Page<ActorDto> getAllActors(Pageable pageable) {
+        Page<Actor> actorsPage = actorRepository.findAll(pageable);
+        return actorsPage.map(actorMapper::toDTO);
     }
 
     public ActorDto getActor(Long id) {
@@ -47,9 +49,9 @@ public class ActorService {
      * @param actorDto the actor data transfer object containing updated information
      * @return the updated actor data transfer object
      */
-    public ActorDto updateActor(ActorDto actorDto) {
-        Actor actor =  actorRepository.findById(actorDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Actor not found with id: " + actorDto.getId()));
+    public ActorDto updateActor(Long id, ActorDto actorDto) {
+        Actor actor =  actorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Actor not found with id: " + id));
 
         actor.setFirstname(actorDto.getFirstname());
         actor.setLastname(actorDto.getLastname());

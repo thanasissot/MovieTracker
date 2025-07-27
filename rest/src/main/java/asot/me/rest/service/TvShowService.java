@@ -33,7 +33,7 @@ public class TvShowService {
     }
 
     private List<Long> getGenreIdsByNames(List<String> genreNames) {
-        List<Genre> genres = genreRepository.findByGenreNameIn(genreNames);
+        List<Genre> genres = genreRepository.findByNameIn(genreNames);
 
         if (genres.size() != genreNames.size()) {
             throw new IllegalArgumentException("Some genres could not be found");

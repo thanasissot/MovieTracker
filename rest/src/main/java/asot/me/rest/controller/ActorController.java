@@ -3,6 +3,10 @@ package asot.me.rest.controller;
 import asot.me.rest.dto.ActorDto;
 import asot.me.rest.service.ActorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,25 +18,26 @@ import java.util.List;
 public class ActorController {
     private final ActorService actorService;
 
-    @GetMapping("/all")
-    public ResponseEntity<List<ActorDto>> getAllActors() {
-        return ResponseEntity.ok(actorService.getAllActors());
+    @GetMapping
+    public ResponseEntity<List<ActorDto>> getAllActors(
+        @RequestParam(value = "_start", defaultValue = "0") int start,
+        @RequestParam(value = "_end", defaultValue = "20") int end,
+        @RequestParam(value = "_sort", defaultValue = "id") String sort,
+        @RequestParam(value = "_order", defaultValue = "asc") String order
+    ) {
+        int size = end - start;
+        int page = start / size;
+        Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
+        Page<ActorDto> pageResult = actorService.getAllActors(pageable);
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(pageResult.getTotalElements()))
+                .body(pageResult.getContent());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ActorDto> getActor(@PathVariable Long id) {
         return ResponseEntity.ok(actorService.getActor(id));
-    }
-
-    @PostMapping("/create")
-    public ResponseEntity<ActorDto> createActor(@RequestBody ActorDto actorDto) {
-        return ResponseEntity.ok(actorService.createActor(actorDto));
-    }
-
-    @PutMapping("/edit")
-    public ResponseEntity<ActorDto> updateActor(@RequestBody ActorDto actorDto) {
-        ActorDto updatedActor = actorService.updateActor(actorDto);
-        return ResponseEntity.ok(updatedActor);
     }
 
     @DeleteMapping("/{id}")
@@ -41,36 +46,63 @@ public class ActorController {
         return ResponseEntity.ok().build();
     }
 
-    // Add movies to actor
-    @PostMapping("/{id}/movies")
-    public ResponseEntity<ActorDto> addMoviesToActor(
-            @PathVariable Long id,
-            @RequestBody List<Long> movieIds) {
-        return ResponseEntity.ok(actorService.addActorToMovies(id, movieIds));
+    @PostMapping
+    public ResponseEntity<ActorDto> createActor(
+        @RequestBody ActorDto actorDto
+    ) {
+        return ResponseEntity.ok(actorService.createActor(actorDto));
     }
 
-    // Add TV shows to actor
-    @PostMapping("/{id}/tvshows")
-    public ResponseEntity<ActorDto> addTvShowsToActor(
-            @PathVariable Long id,
-            @RequestBody List<Long> tvShowIds) {
-        return ResponseEntity.ok(actorService.addActorToTvshows(id, tvShowIds));
+    @PutMapping("/{id}")
+    public ResponseEntity<ActorDto> editActor(
+        @PathVariable Long id,
+        @RequestBody ActorDto actorDto)
+    {
+        ActorDto updatedActor = actorService.updateActor(id, actorDto);
+        return ResponseEntity.ok(updatedActor);
     }
 
-    // Remove movies from actor
-    @DeleteMapping("/{id}/movies")
-    public ResponseEntity<ActorDto> removeMoviesFromActor(
+    @PatchMapping("/{id}")
+    public ResponseEntity<ActorDto> editActor2(
             @PathVariable Long id,
-            @RequestBody List<Long> movieIds) {
-        return ResponseEntity.ok(actorService.removeActorFromMovies(id, movieIds));
+            @RequestBody ActorDto actorDto)
+    {
+        ActorDto updatedActor = actorService.updateActor(id, actorDto);
+        return ResponseEntity.ok(updatedActor);
     }
 
-    // Remove TV shows from actor
-    @DeleteMapping("/{id}/tvshows")
-    public ResponseEntity<ActorDto> removeTvShowsFromActor(
-            @PathVariable Long id,
-            @RequestBody List<Long> tvShowIds) {
-        return ResponseEntity.ok(actorService.removeActorFromTvshows(id, tvShowIds));
-    }
+
+
+//    // Add movies to actor
+//    @PostMapping("/{id}/movies")
+//    public ResponseEntity<ActorDto> addMoviesToActor(
+//            @PathVariable Long id,
+//            @RequestBody List<Long> movieIds) {
+//        return ResponseEntity.ok(actorService.addActorToMovies(id, movieIds));
+//    }
+//
+//    // Add TV shows to actor
+//    @PostMapping("/{id}/tvshows")
+//    public ResponseEntity<ActorDto> addTvShowsToActor(
+//            @PathVariable Long id,
+//            @RequestBody List<Long> tvShowIds) {
+//        return ResponseEntity.ok(actorService.addActorToTvshows(id, tvShowIds));
+//    }
+//
+//    // Remove movies from actor
+//    @DeleteMapping("/{id}/movies")
+//    public ResponseEntity<ActorDto> removeMoviesFromActor(
+//            @PathVariable Long id,
+//            @RequestBody List<Long> movieIds) {
+//        return ResponseEntity.ok(actorService.removeActorFromMovies(id, movieIds));
+//    }
+//
+//    // Remove TV shows from actor
+//    @DeleteMapping("/{id}/tvshows")
+//    public ResponseEntity<ActorDto> removeTvShowsFromActor(
+//            @PathVariable Long id,
+//            @RequestBody List<Long> tvShowIds) {
+//        return ResponseEntity.ok(actorService.removeActorFromTvshows(id, tvShowIds));
+//    }
 
 }

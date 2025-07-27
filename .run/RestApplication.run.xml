@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="RestApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <module name="rest" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="asot.me.rest.RestApplication" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="asot.me.rest.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -1,9 +1,14 @@
 package asot.me.rest.controller;
 
+import asot.me.rest.dto.GenreDto;
 import asot.me.rest.dto.MovieDto;
 import asot.me.rest.dto.MovieGenresUpdateRequest;
 import asot.me.rest.service.MovieService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,26 +20,26 @@ import java.util.List;
 public class MovieController {
     private final MovieService movieService;
 
-    @GetMapping("/all")
-    public ResponseEntity<List<MovieDto>> getAllMovies() {
-        return ResponseEntity.ok(movieService.getAllMovies());
+    @GetMapping
+    public ResponseEntity<List<MovieDto>> getAllMovies(
+        @RequestParam(value = "_start", defaultValue = "0") int start,
+        @RequestParam(value = "_end", defaultValue = "20") int end,
+        @RequestParam(value = "_sort", defaultValue = "id") String sort,
+        @RequestParam(value = "_order", defaultValue = "asc") String order
+    ) {
+        int size = end - start;
+        int page = start / size;
+        Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
+        Page<MovieDto> pageResult = movieService.getAllMovies(pageable);
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(pageResult.getTotalElements()))
+                .body(pageResult.getContent());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MovieDto> getMovie(@PathVariable Long id) {
         return ResponseEntity.ok(movieService.getMovie(id));
-    }
-
-    @PostMapping("/create")
-    public ResponseEntity<MovieDto> createMovie(@RequestBody MovieDto movieDto) {
-        MovieDto createdMovie = movieService.createMovie(movieDto);
-        return ResponseEntity.ok(createdMovie);
-    }
-
-    @PutMapping("/edit")
-    public ResponseEntity<MovieDto> editMovie(@RequestBody MovieDto movieDto) {
-        MovieDto updatedMovie = movieService.updateMovie(movieDto);
-        return ResponseEntity.ok(updatedMovie);
     }
 
     @DeleteMapping("/{id}")
@@ -43,27 +48,39 @@ public class MovieController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{id}/genres")
-    public ResponseEntity<MovieDto> updateMovieGenres(
-            @PathVariable Long id,
-            @RequestBody MovieGenresUpdateRequest request) {
-        MovieDto updatedMovie = movieService.updateMovieGenres(id, request.getGenreNames());
+    @PostMapping
+    public ResponseEntity<MovieDto> createMovie(
+        @RequestBody MovieDto movieDto
+    ) {
+        MovieDto createdMovie = movieService.createMovie(movieDto);
+        return ResponseEntity.ok(createdMovie);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<MovieDto> editMovie(
+        @PathVariable Long id,
+        @RequestBody MovieDto movieDto
+    ) {
+        MovieDto updatedMovie = movieService.updateMovie(id, movieDto);
         return ResponseEntity.ok(updatedMovie);
     }
 
-    @PostMapping("/{id}/genres")
-    public ResponseEntity<MovieDto> addMovieGenres(
+    @PatchMapping("/{id}")
+    public ResponseEntity<MovieDto> editMovie2(
             @PathVariable Long id,
-            @RequestBody MovieGenresUpdateRequest request) {
-        MovieDto updatedMovie = movieService.addMovieGenres(id, request.getGenreNames());
+            @RequestBody MovieDto movieDto
+    ) {
+        MovieDto updatedMovie = movieService.updateMovie(id, movieDto);
         return ResponseEntity.ok(updatedMovie);
     }
 
-    @DeleteMapping("/{id}/genres")
-    public ResponseEntity<MovieDto> removeMovieGenres(
-            @PathVariable Long id,
-            @RequestBody MovieGenresUpdateRequest request) {
-        MovieDto updatedMovie = movieService.removeMovieGenres(id, request.getGenreNames());
-        return ResponseEntity.ok(updatedMovie);
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<MovieDto> updateMovieGenres(
+//        @PathVariable Long id,
+//        @RequestBody MovieDto movieDto)
+//    {
+////        MovieDto updatedMovie = movieService.updateMovieGenres(id, request.getGenreNames());
+//        return ResponseEntity.ok(movieDto);
+//    }
+
 }
