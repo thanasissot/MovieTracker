@@ -75,6 +75,24 @@ public class MovieController {
         return ResponseEntity.ok(updatedMovie);
     }
 
+    @PostMapping("/{id}/genres")
+    public ResponseEntity<MovieDto> addGenreToMovie(
+        @PathVariable Long id,
+        @RequestBody List<Long> genreIds
+    ) {
+        MovieDto movieDto = movieService.addGenreToMovie(id, genreIds);
+        return ResponseEntity.ok(movieDto);
+    }
+
+    @DeleteMapping("/{id}/genres")
+    public ResponseEntity<MovieDto> deleteGenreFromMovie(
+        @PathVariable Long id,
+        @RequestBody List<Long> genreIds
+    ) {
+        MovieDto movieDto = movieService.deleteGenreFromMovie(id, genreIds);
+        return ResponseEntity.ok(movieDto);
+    }
+
 //    @PutMapping("/{id}")
 //    public ResponseEntity<MovieDto> updateMovieGenres(
 //        @PathVariable Long id,

@@ -3,6 +3,7 @@ package asot.me.rest.service;
 import asot.me.rest.dom.Actor;
 import asot.me.rest.dom.Genre;
 import asot.me.rest.dom.Movie;
+import asot.me.rest.dto.GenreDto;
 import asot.me.rest.dto.MovieDto;
 import asot.me.rest.mapper.MovieMapper;
 import asot.me.rest.repository.GenreRepository;
@@ -98,6 +99,44 @@ public class MovieService {
         return genres.stream()
                 .map(Genre::getId)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public MovieDto addGenreToMovie(Long movieId, List<Long> genreIds) {
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + movieId));
+
+        List<Long> idsToAdd = new ArrayList<>();
+
+        for (Long genreId : genreIds) {
+            Genre genre = genreRepository.findById(genreId)
+                    .orElseThrow(() -> new EntityNotFoundException("Genre not found with id: " + genreId));
+
+            idsToAdd.add(genre.getId());
+        }
+
+        movie.getGenreIds().addAll(idsToAdd);
+
+        return movieMapper.toDTO(movieRepository.save(movie));
+    }
+
+    @Transactional
+    public MovieDto deleteGenreFromMovie(Long movieId, List<Long> genreIds) {
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + movieId));
+
+        List<Long> idsToRemove = new ArrayList<>();
+        for (Long genreId : genreIds) {
+            Genre genre = genreRepository.findById(genreId)
+                    .orElseThrow(() -> new EntityNotFoundException("Genre not found with id: " + genreId));
+            if (movie.getGenreIds().contains(genre.getId())) {
+                idsToRemove.add(genre.getId());
+            }
+        }
+
+        movie.getGenreIds().removeAll(idsToRemove);
+
+        return movieMapper.toDTO(movieRepository.save(movie));
     }
 
     @Transactional
