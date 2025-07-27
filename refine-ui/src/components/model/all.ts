@@ -4,6 +4,7 @@ export interface Movie {
     year: number;
     genres: Genre[];
     genreIds?: number[];
+    actors: Actor[];
 }
 
 export interface Actor {

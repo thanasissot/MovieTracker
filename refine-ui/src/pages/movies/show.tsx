@@ -30,6 +30,7 @@ export const MovieShow = () => {
   const [genreOptions, setGenreOptions] = useState<Genre[]>([]);
   const [selectedGenreId, setSelectedGenreId] = useState<number | "">("");
   const [genres, setGenres] = useState<Genre[]>([]);
+  const [allGenres, setAllGenres] = useState<Genre[]>([]);
 
   const { query } = useShow({});
   const { data, isLoading } = query;
@@ -51,10 +52,8 @@ export const MovieShow = () => {
         }
       });
       const tempGenres = response.data as Genre[];
-      console.log(tempGenres);
-      console.log(record);
+      setAllGenres(tempGenres);
       if (record?.genreIds && record.genreIds.length > 0 && tempGenres.length > 0) {
-        console.log(tempGenres);
         const movieGenres = record.genreIds
             .map(id => tempGenres.find((genre: Genre) => genre.id === id))
             .filter(Boolean); // Remove any undefined entries
@@ -93,7 +92,7 @@ export const MovieShow = () => {
       setGenres(updatedGenres);
 
       // Update available options
-      updateGenreOptions(updatedGenres.map(g => g.id), genreOptions);
+      updateGenreOptions(updatedGenres.map(g => g.id), allGenres);
     } catch (error) {
       console.error("Error removing genre:", error);
     }
@@ -249,15 +248,12 @@ export const MovieShow = () => {
               This movie has not been assigned any genres.
             </Typography>
         )}
-
-
         <Divider sx={{ my: 2 }} />
-
         <Typography variant="h6">Actors</Typography>
-        {record?.actors?.length > 0 ? (
+        {(record?.actors && record.actors.length > 0) ? (
             <Box sx={{ height: 400, width: '100%' }}>
               <DataGrid
-                  rows={record.actors}
+                  rows={record?.actors}
                   columns={actorColumns}
                   disableRowSelectionOnClick
                   autoHeight
