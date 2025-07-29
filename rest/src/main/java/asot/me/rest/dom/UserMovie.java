@@ -23,7 +23,7 @@ public class UserMovie {
     @JoinColumn(name = "appUserId", insertable = false, updatable = false)
     private AppUser appUser;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "movieId", insertable = false, updatable = false)
     private Movie movie;
 }
