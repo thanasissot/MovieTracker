@@ -23,16 +23,7 @@ public class AppUser {
     @Column(nullable = false, unique = true)
     private String username;
 
-
-    @ManyToMany
-    @JoinTable(
-            name = "app_user_favorite_movies",
-            joinColumns = @JoinColumn(name = "app_user_id"),
-            inverseJoinColumns = @JoinColumn(name = "movie_id")
-    )
-    private Set<Movie> favoriteMovies = new HashSet<>();
-
-    @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserMovieWatchStatus> watchStatuses = new HashSet<>();
-
+    @OneToMany(mappedBy = "appUser", fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<UserMovie> userMovies = new HashSet<>();
 }

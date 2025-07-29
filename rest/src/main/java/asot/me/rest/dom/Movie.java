@@ -3,10 +3,7 @@ package asot.me.rest.dom;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Type;
 
 import java.util.HashSet;
@@ -27,7 +24,6 @@ public class Movie {
 
     @Column(columnDefinition = "bigint[]")
     @Type(ListArrayType.class)
-//    @JdbcTypeCode(SqlTypes.JSON)
     private List<Long> genreIds;
 
     @JsonIgnore

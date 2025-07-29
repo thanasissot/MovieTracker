@@ -19,11 +19,11 @@ public class BootStrapService {
     private final TvShowRepository tvShowRepository;
     private final ActorRepository actorRepository;
     private final AppUserRepository appUserRepository;
-    private final UserMovieWatchStatusRepository userMovieWatchStatusRepository;
+    private final UserMovieRepository userMovieRepository;
 
     public void deleteAll() {
         log.info("Deleting all data from the database...");
-        userMovieWatchStatusRepository.deleteAll();
+        userMovieRepository.deleteAll();
         appUserRepository.deleteAll();
         actorRepository.deleteAll();
         tvShowRepository.deleteAll();
@@ -234,18 +234,12 @@ public class BootStrapService {
         List<AppUser> users = Arrays.asList(
                 AppUser.builder()
                         .username("johndoe")
-                        .favoriteMovies(new HashSet<>())
-                        .watchStatuses(new HashSet<>())
                         .build(),
                 AppUser.builder()
                         .username("janedoe")
-                        .favoriteMovies(new HashSet<>())
-                        .watchStatuses(new HashSet<>())
                         .build(),
                 AppUser.builder()
                         .username("bobsmith")
-                        .favoriteMovies(new HashSet<>())
-                        .watchStatuses(new HashSet<>())
                         .build()
         );
 
@@ -255,83 +249,101 @@ public class BootStrapService {
     }
 
     protected void initializeUserMovieWatchStatus(List<AppUser> users, List<Movie> movies) {
-        List<UserMovieWatchStatus> watchStatuses = new ArrayList<>();
+        List<UserMovie> userMovies = new ArrayList<>();
 
         // User 1 (John) has watched movies 0, 1, 2 and added movies 0, 1 to favorites
         AppUser john = users.get(0);
-        john.getFavoriteMovies().add(movies.get(0));
-        john.getFavoriteMovies().add(movies.get(1));
-        appUserRepository.save(john);
 
-        watchStatuses.add(UserMovieWatchStatus.builder()
-                .appUser(john)
-                .movie(movies.get(0))
+        userMovies.add(UserMovie.builder()
+                .appUserId(john.getId())
+                .movieId(movies.get(0).getId())
+//                .appUser(john)
+//                .movie(movies.get(0))
                 .watched(true)
+                .favorite(true)
                 .build());
 
-        watchStatuses.add(UserMovieWatchStatus.builder()
-                .appUser(john)
-                .movie(movies.get(1))
+        userMovies.add(UserMovie.builder()
+                .appUserId(john.getId())
+                .movieId(movies.get(1).getId())
+//                .appUser(john)
+//                .movie(movies.get(1))
                 .watched(true)
+                .favorite(true)
                 .build());
 
-        watchStatuses.add(UserMovieWatchStatus.builder()
-                .appUser(john)
-                .movie(movies.get(2))
+        userMovies.add(UserMovie.builder()
+                .appUserId(john.getId())
+                .movieId(movies.get(2).getId())
+//                .appUser(john)
+//                .movie(movies.get(2))
                 .watched(true)
+                .favorite(false)
                 .build());
 
         // User 2 (Jane) has watched movies 2, 3, 4 and added movies 2, 3 to favorites
         AppUser jane = users.get(1);
-        jane.getFavoriteMovies().add(movies.get(2));
-        jane.getFavoriteMovies().add(movies.get(3));
-        appUserRepository.save(jane);
 
-        watchStatuses.add(UserMovieWatchStatus.builder()
+        userMovies.add(UserMovie.builder()
+                .appUserId(jane.getId())
+                .movieId(movies.get(2).getId())
                 .appUser(jane)
                 .movie(movies.get(2))
                 .watched(true)
+                .favorite(true)
                 .build());
 
-        watchStatuses.add(UserMovieWatchStatus.builder()
+        userMovies.add(UserMovie.builder()
+                .appUserId(jane.getId())
+                .movieId(movies.get(3).getId())
                 .appUser(jane)
                 .movie(movies.get(3))
                 .watched(true)
+                .favorite(true)
                 .build());
 
-        watchStatuses.add(UserMovieWatchStatus.builder()
+        userMovies.add(UserMovie.builder()
+                .appUserId(jane.getId())
+                .movieId(movies.get(4).getId())
                 .appUser(jane)
                 .movie(movies.get(4))
                 .watched(true)
+                .favorite(false)
                 .build());
 
         // User 3 (Bob) has watched movie 1 and added it to favorites
         // Also has movie 2 and 4 in watchlist (not watched yet)
         AppUser bob = users.get(2);
-        bob.getFavoriteMovies().add(movies.get(1));
-        appUserRepository.save(bob);
 
-        watchStatuses.add(UserMovieWatchStatus.builder()
+        userMovies.add(UserMovie.builder()
+                .appUserId(bob.getId())
+                .movieId(movies.get(1).getId())
                 .appUser(bob)
                 .movie(movies.get(1))
                 .watched(true)
+                .favorite(true)
                 .build());
 
-        watchStatuses.add(UserMovieWatchStatus.builder()
+        userMovies.add(UserMovie.builder()
+                .appUserId(bob.getId())
+                .movieId(movies.get(2).getId())
                 .appUser(bob)
                 .movie(movies.get(2))
                 .watched(false)
+                .favorite(false)
                 .build());
 
-        watchStatuses.add(UserMovieWatchStatus.builder()
+        userMovies.add(UserMovie.builder()
+                .appUserId(bob.getId())
+                .movieId(movies.get(4).getId())
                 .appUser(bob)
                 .movie(movies.get(4))
                 .watched(false)
+                .favorite(false)
                 .build());
 
-        userMovieWatchStatusRepository.saveAll(watchStatuses);
-        log.info("Successfully initialized {} user movie watch status records", watchStatuses.size());
+        userMovieRepository.saveAll(userMovies);
+        log.info("Successfully initialized {} user movie records", userMovies.size());
     }
-
 
 }
