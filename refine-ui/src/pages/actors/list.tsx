@@ -7,7 +7,7 @@ import {
   useDataGrid,
 } from "@refinedev/mui";
 import {  useList } from "@refinedev/core";
-import { FormControl, InputLabel, Select, MenuItem, Box, TextField, InputAdornment, IconButton } from "@mui/material";
+import { FormControl, InputLabel, Select, MenuItem, Box, TextField, InputAdornment, IconButton, SelectChangeEvent } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
 import React, { useState, useEffect, useMemo } from "react";
 
@@ -40,8 +40,8 @@ export const ActorList = () => {
 
     const movies = moviesData?.data || [];
 
-    const handleMovieChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setMovieId(event.target.value as number | null);
+    const handleMovieChange = (event: SelectChangeEvent<number | string>) => {
+        setMovieId(event.target.value === "" ? null : Number(event.target.value));
     };
 
     const handleMovieSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
