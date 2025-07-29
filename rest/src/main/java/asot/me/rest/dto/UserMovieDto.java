@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class UserMovieDto {
+    private Long movieId;
     private UserMovieMovieDto movie;
     private boolean watched;
     private boolean favorite;

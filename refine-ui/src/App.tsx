@@ -30,6 +30,67 @@ import { Header } from "./components/header";
 import {GenreCreate, GenreEdit, GenreList, GenreShow} from "./pages/genre";
 import {MovieCreate, MovieEdit, MovieList, MovieShow} from "./pages/movies";
 import {ActorCreate, ActorEdit, ActorList, ActorShow} from "./pages/actors";
+import { AuthProvider } from "@refinedev/core";
+import { Login } from "./pages/login";
+import axios from "axios";
+import { ConfigProvider, App as AntdApp } from "antd";
+import { Homepage } from "./pages/homepage";
+
+const authProvider: AuthProvider = {
+  // --
+  login: async ({ username }) => {
+    // You can handle the login process according to your needs.
+    const response = await axios.get(`http://localhost:8080/users/username`, {
+      params: {
+        username
+      }
+    });
+    // If the process is successful.
+    if (response.status === 200) {
+      console.log(response.data)
+      localStorage.setItem("user",  JSON.stringify(response.data))
+      return {
+        success: true,
+        redirectTo: "/",
+      };
+    }
+
+    return {
+      success: false,
+      error: {
+        name: "Login Error",
+        message: "Invalid email or password",
+      },
+    };
+  },
+  // --
+  logout: async () => {
+    localStorage.removeItem("user");
+    return {
+      success: true,
+      redirectTo: "/login",
+    };
+  },
+  onError: async (error) => {
+    if (error.response?.status === 401) {
+      return {
+        logout: true,
+      };
+    }
+
+    return { error };
+  },
+  check: async () =>
+      localStorage.getItem("user")
+          ? {
+            authenticated: true,
+          }
+          : {
+            authenticated: false,
+            redirectTo: "/login",
+          },
+  getPermissions: async () => ["admin"],
+};
 
 function App() {
   return (
@@ -41,10 +102,12 @@ function App() {
           <GlobalStyles styles={{ html: { WebkitFontSmoothing: "auto" } }} />
           <RefineSnackbarProvider>
             <DevtoolsProvider>
+              <AntdApp>
               <Refine
                 dataProvider={dataProvider("http://localhost:8080")}
                 notificationProvider={useNotificationProvider}
                 routerProvider={routerBindings}
+                authProvider={authProvider}
                 resources={[
                   {
                     name: "genres",
@@ -87,22 +150,34 @@ function App() {
               >
                 <Routes>
                   <Route
-                    element={
-                      <ThemedLayoutV2 Header={() => <Header sticky />}>
-                        <Outlet />
-                      </ThemedLayoutV2>
-                    }
+                      element={
+                        <Authenticated
+                            key="authenticated-routes"
+                            fallback={<CatchAllNavigate to="/login" />}
+                        >
+                          <ThemedLayoutV2>
+                            <Outlet />
+                          </ThemedLayoutV2>
+                        </Authenticated>
+                      }
                   >
                     <Route
                       index
-                      element={<NavigateToResource resource="movies" />}
+                      element={<Homepage />}
+
                     />
-                    {/*<Route path="/favories">*/}
-                    {/*  <Route index element={<GenreList />} />*/}
-                    {/*  <Route path="create" element={<GenreCreate />} />*/}
-                    {/*  <Route path="edit/:id" element={<GenreEdit />} />*/}
-                    {/*  <Route path="show/:id" element={<GenreShow />} />*/}
-                    {/*</Route>*/}
+                  </Route>
+                  <Route
+                      element={
+                        <Authenticated key="auth-pages" fallback={<Outlet />}>
+                          <NavigateToResource resource="movies" />
+                        </Authenticated>
+                      }
+                  >
+                    <Route path="/login" element={<Login />} />
+                  </Route>
+
+                  <Route>
                     <Route path="/genres">
                       <Route index element={<GenreList />} />
                       <Route path="create" element={<GenreCreate />} />
@@ -125,11 +200,11 @@ function App() {
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
                 </Routes>
-
                 <RefineKbar />
                 <UnsavedChangesNotifier />
                 <DocumentTitleHandler />
               </Refine>
+              </AntdApp>
               <DevtoolsPanel />
             </DevtoolsProvider>
           </RefineSnackbarProvider>

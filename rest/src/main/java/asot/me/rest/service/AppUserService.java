@@ -4,6 +4,7 @@ import asot.me.rest.dom.AppUser;
 import asot.me.rest.dto.AppUserDto;
 import asot.me.rest.mapper.AppUserMapper;
 import asot.me.rest.repository.AppUserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,18 @@ import org.springframework.stereotype.Service;
 public class AppUserService {
     private final AppUserRepository appUserRepository;
     private final AppUserMapper appUserMapper;
+
+    public AppUserDto getAppUser(Long id) {
+        AppUser appUser = appUserRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("AppUser not found with id: " + id));
+        return appUserMapper.toDTO(appUser);
+    }
+
+    public AppUserDto getAppUserByUsername(String username) {
+        AppUser appUser = appUserRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("AppUser not found with username: " + username));
+        return appUserMapper.toDTO(appUser);
+    }
 
     public Page<AppUserDto> getAllAppUsers(String username, Pageable pageable) {
         Page<AppUser> appUserPage = null;
@@ -31,11 +44,7 @@ public class AppUserService {
 //        return actors.map(actorMapper::toDTO);
 //    }
 //
-//    public ActorDto getActor(Long id) {
-//        Actor actor =  actorRepository.findById(id)
-//                .orElseThrow(() -> new EntityNotFoundException("Actor not found with id: " + id));
-//        return actorMapper.toDTO(actor);
-//    }
+
 //
 //    public ActorDto createActor(ActorDto actorDto) {
 //        Actor actor = actorMapper.toEntity(actorDto);

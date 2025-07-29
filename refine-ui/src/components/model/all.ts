@@ -18,3 +18,24 @@ export interface Genre {
     id: number;
     name: string;
 }
+
+export interface AppUser {
+    id: number;
+    username: string;
+    userMovies: UserMovie[];
+}
+
+export interface UserMovie {
+    movieId: number;
+    movie: Movie;
+    watched: boolean;
+    favorite: boolean;
+}
+
+export interface FlattenedUserMovie {
+    movieId: number;
+    title: string;
+    year: number;
+    watched: boolean;
+    favorite: boolean;
+}
