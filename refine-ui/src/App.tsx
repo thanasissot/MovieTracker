@@ -164,20 +164,7 @@ function App() {
                     <Route
                       index
                       element={<Homepage />}
-
                     />
-                  </Route>
-                  <Route
-                      element={
-                        <Authenticated key="auth-pages" fallback={<Outlet />}>
-                          <NavigateToResource resource="movies" />
-                        </Authenticated>
-                      }
-                  >
-                    <Route path="/login" element={<Login />} />
-                  </Route>
-
-                  <Route>
                     <Route path="/genres">
                       <Route index element={<GenreList />} />
                       <Route path="create" element={<GenreCreate />} />
@@ -196,8 +183,16 @@ function App() {
                       <Route path="edit/:id" element={<ActorEdit />} />
                       <Route path="show/:id" element={<ActorShow />} />
                     </Route>
-
                     <Route path="*" element={<ErrorComponent />} />
+                  </Route>
+                  <Route
+                      element={
+                        <Authenticated key="auth-pages" fallback={<Outlet />}>
+                          <NavigateToResource />
+                        </Authenticated>
+                      }
+                  >
+                    <Route path="/login" element={<Login />} />
                   </Route>
                 </Routes>
                 <RefineKbar />
