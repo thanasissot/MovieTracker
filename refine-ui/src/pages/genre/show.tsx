@@ -1,34 +1,35 @@
-import { Stack, Typography } from "@mui/material";
-import { useOne, useShow } from "@refinedev/core";
-import {
-  DateField,
-  MarkdownField,
-  NumberField,
-  Show,
-  TextFieldComponent as TextField,
-} from "@refinedev/mui";
+import { Stack, Typography, Card, CardContent, Divider } from "@mui/material";
+import { useShow } from "@refinedev/core";
+import { Show, TextFieldComponent as TextField, } from "@refinedev/mui";
 
 export const GenreShow = () => {
-  const { query } = useShow({});
-
-  const { data, isLoading } = query;
-
+  const { queryResult } = useShow({});
+  const { data, isLoading } = queryResult;
   const record = data?.data;
 
   return (
-    <Show isLoading={isLoading}>
-      <Stack gap={1}>
-        <Typography variant="body1" fontWeight="bold">
-          {"ID"}
-        </Typography>
-        <TextField value={record?.id} />
+      <Show isLoading={isLoading}>
+        <Card>
+          <CardContent>
+            <Stack spacing={2}>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Typography variant="subtitle1" fontWeight="bold" width="100px">
+                  ID:
+                </Typography>
+                <Typography variant="body1">{record?.id}</Typography>
+              </Stack>
 
-        <Typography variant="body1" fontWeight="bold">
-          {"Genre"}
-        </Typography>
-        <TextField value={record?.name} />
+              <Divider />
 
-      </Stack>
-    </Show>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Typography variant="subtitle1" fontWeight="bold" width="100px">
+                  Genre:
+                </Typography>
+                <Typography variant="body1">{record?.name}</Typography>
+              </Stack>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Show>
   );
 };

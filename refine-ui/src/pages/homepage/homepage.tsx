@@ -120,44 +120,82 @@ export const Homepage = () => {
                 field: "movieId",
                 headerName: "ID",
                 type: "number",
-                minWidth: 50,
-                display: "flex",
-                align: "left",
-                headerAlign: "left",
+                width: 70,
+                align: "center",
+                headerAlign: "center"
             },
             {
                 field: "title",
                 headerName: "Title",
-                minWidth: 200,
-                display: "flex",
+                renderHeader: (params) => (
+                    <div style={{ paddingLeft: '6px', display: 'flex', alignItems: 'center', height: '100%' }}>
+                        {params.colDef.headerName}
+                    </div>
+                ),
+                headerClassName: "pl-5",
+                flex: 1,
+                minWidth: 180,
+                renderCell: (params) => (
+                    <div
+                        style={{
+                            lineHeight: 3,
+                            width: '100%',
+                            fontWeight: 500,
+                            fontSize: '0.875rem',
+                            whiteSpace: 'normal',
+                            wordWrap: 'break-word',
+                            display: '-webkit-box',
+                            overflow: 'hidden',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            padding: '6px'
+                        }}
+                    >
+                        {params.value}
+                    </div>
+                ),
             },
             {
                 field: "year",
                 headerName: "Year",
-                minWidth: 200,
-                display: "flex",
+                width: 100,
+                align: "center",
+                headerAlign: "center",
             },
             {
                 field: "watched",
                 headerName: "Watched",
-                minWidth: 200,
-                display: "flex",
-                type: "boolean",
+                width: 120,
+                align: "center",
+                headerAlign: "center",
+                renderCell: (params) => (
+                    params.value ?
+                        <VisibilityIcon color="primary" /> :
+                        <VisibilityOffIcon color="action" sx={{ opacity: 0.6 }} />
+                ),
             },
             {
                 field: "favorite",
                 headerName: "Favorite",
-                minWidth: 200,
-                display: "flex",
-                type: "boolean",
+                width: 120,
+                align: "center",
+                headerAlign: "center",
+                renderCell: (params) => (
+                    params.value ?
+                        <FavoriteIcon color="error" /> :
+                        <FavoriteBorderIcon color="action" sx={{ opacity: 0.6 }} />
+                ),
             },
             {
                 field: "actions",
                 headerName: "Actions",
-                minWidth: 200,
+                width: 120,
+                align: "center",
+                headerAlign: "center",
                 renderCell: (params) => (
-                    <>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <IconButton
+                            size="small"
                             onClick={() => {
                                 setSelectedAction({
                                     movieId: params.row.movieId,
@@ -167,10 +205,10 @@ export const Homepage = () => {
                                 setDialogOpen(true);
                             }}
                         >
-                            {params.row.watched ? <VisibilityIcon color="primary" /> : <VisibilityOffIcon />}
+                            {params.row.watched ? <VisibilityOffIcon /> : <VisibilityIcon />}
                         </IconButton>
-
                         <IconButton
+                            size="small"
                             onClick={() => {
                                 setSelectedAction({
                                     movieId: params.row.movieId,
@@ -180,9 +218,9 @@ export const Homepage = () => {
                                 setDialogOpen(true);
                             }}
                         >
-                            {params.row.favorite ? <FavoriteIcon color="error" /> : <FavoriteBorderIcon />}
+                            {params.row.favorite ? <FavoriteBorderIcon /> : <FavoriteIcon />}
                         </IconButton>
-                    </>
+                    </div>
                 ),
             },
         ],
