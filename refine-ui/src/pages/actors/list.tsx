@@ -9,7 +9,7 @@ import {
 import {  useList } from "@refinedev/core";
 import { FormControl, InputLabel, Select, MenuItem, Box, TextField, InputAdornment, IconButton, SelectChangeEvent } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 
 export const ActorList = () => {
     const [movieId, setMovieId] = useState<number | null>(null);
@@ -63,51 +63,107 @@ export const ActorList = () => {
 
   const columns = React.useMemo<GridColDef[]>(
     () => [
-      {
-        field: "id",
-        headerName: "ID",
-        type: "number",
-        minWidth: 50,
-        display: "flex",
-        align: "left",
-        headerAlign: "left",
-      },
-      {
-        field: "firstname",
-        headerName: "Firstname",
-        minWidth: 200,
-        display: "flex",
-      },
-      {
-        field: "lastname",
-        headerName: "Lastname",
-        minWidth: 200,
-        display: "flex",
-      },
-      {
-        field: "actions",
-        headerName: "Actions",
-        align: "right",
-        headerAlign: "right",
-        minWidth: 120,
-        sortable: false,
-        display: "flex",
-        renderCell: function render({ row }) {
-          return (
-            <>
-              <EditButton hideText recordItemId={row.id} />
-              <ShowButton hideText recordItemId={row.id} />
-              <DeleteButton hideText recordItemId={row.id} />
-            </>
-          );
+        {
+            field: "id",
+            headerName: "ID",
+            type: "number",
+            width: 70,
+            align: "center",
+            headerAlign: "center",
         },
-      },
+        {
+            field: "firstname",
+            headerName: "Firstname",
+            width: 150,
+            renderHeader: (params) => (
+                <div style={{ paddingLeft: '16px', display: 'flex', alignItems: 'center', height: '100%' }}>
+                    {params.colDef.headerName}
+                </div>
+            ),
+            renderCell: (params) => (
+                <div
+                    style={{
+                        width: '100%',
+                        fontWeight: 500,
+                        fontSize: '0.875rem',
+                        whiteSpace: 'normal',
+                        wordWrap: 'break-word',
+                        display: '-webkit-box',
+                        overflow: 'hidden',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        padding: '0px 0 6px 16px'
+                    }}
+                >
+                    {params.value}
+                </div>
+            ),
+        },
+        {
+            field: "lastname",
+            headerName: "Lastname",
+            width: 150,
+            renderHeader: (params) => (
+                <div style={{ paddingLeft: '16px', display: 'flex', alignItems: 'center', height: '100%' }}>
+                    {params.colDef.headerName}
+                </div>
+            ),
+            renderCell: (params) => (
+                <div
+                    style={{
+                        width: '100%',
+                        fontWeight: 500,
+                        fontSize: '0.875rem',
+                        whiteSpace: 'normal',
+                        wordWrap: 'break-word',
+                        display: '-webkit-box',
+                        overflow: 'hidden',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        padding: '0px 0 6px 16px'
+                    }}
+                >
+                    {params.value}
+                </div>
+            ),
+        },
+        {
+            field: "actions",
+            headerName: "Actions",
+            width: 150,
+            align: "center",
+            headerAlign: "center",
+            sortable: false,
+            renderCell: function render({ row }) {
+                return (
+                    <div style={{
+                        display: "flex",
+                        gap: "8px",
+                        justifyContent: "center",
+                        width: "100%"
+                    }}>
+                        <EditButton hideText recordItemId={row.id} />
+                        <ShowButton hideText recordItemId={row.id} />
+                        <DeleteButton hideText recordItemId={row.id} />
+                    </div>
+                );
+            },
+        },
     ],
     []
   );
 
   return (
-    <List>
+    <List
+        wrapperProps={{
+            style: {
+                maxWidth: '1800px',
+                margin: '0 auto',
+                width: '100%',
+                padding: '16px'
+            },
+        }}
+    >
         <Box display="flex" flexDirection="column" gap={2}>
             <TextField
                 label="Search Movies"

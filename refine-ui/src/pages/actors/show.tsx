@@ -124,21 +124,29 @@ export const ActorShow = () => {
       field: "id",
       headerName: "ID",
       width: 50,
+      align: "center",
+      headerAlign: "center",
     },
     {
       field: "title",
       headerName: "Movie Title",
       flex: 1,
       minWidth: 120,
+      align: "center",
+      headerAlign: "center",
     },
     {
       field: "year",
       headerName: "Release Year",
       width: 120,
+      align: "center",
+      headerAlign: "center",
     },
     {
       field: "actions",
       headerName: "Actions",
+      align: "center",
+      headerAlign: "center",
       sortable: false,
       width: 100,
       renderCell: (params: GridRenderCellParams) => (
@@ -148,14 +156,22 @@ export const ActorShow = () => {
               startIcon={<DeleteIcon />}
               size="small"
           >
-            Remove
           </Button>
       ),
     },
   ];
 
   return (
-    <Show isLoading={isLoading}>
+    <Show isLoading={isLoading}
+          wrapperProps={{
+            style: {
+              maxWidth: '800px',
+              margin: '0 auto',
+              width: '100%',
+              padding: '16px'
+            },
+          }}
+    >
       <Stack gap={1}>
         <TableContainer component={Paper}>
           <Table>
@@ -174,10 +190,7 @@ export const ActorShow = () => {
           </Table>
         </TableContainer>
 
-        <Divider sx={{ my: 2 }} />
-
-
-        <Typography variant="h6" sx={{ mb: 2 }}>Manage Movies</Typography>
+        <Typography variant="h6" sx={{ mt: 4 }}>Manage Movies</Typography>
 
         {/* Search and Add Movies */}
         <Box sx={{ display: "flex", mb: 2, gap: 1 }}>

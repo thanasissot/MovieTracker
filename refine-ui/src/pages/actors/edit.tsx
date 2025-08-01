@@ -1,9 +1,7 @@
-import { Autocomplete, Box, Select, TextField } from "@mui/material";
-import MenuItem from "@mui/material/MenuItem";
-import { Edit, useAutocomplete } from "@refinedev/mui";
+import {  Box, TextField } from "@mui/material";
+import { Edit } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
 import React from "react";
-import { Controller } from "react-hook-form";
 
 export const ActorEdit = () => {
   const {
@@ -17,11 +15,20 @@ export const ActorEdit = () => {
   const actorData = queryResult?.data?.data;
 
   return (
-    <Edit isLoading={formLoading} saveButtonProps={saveButtonProps}>
+    <Edit isLoading={formLoading} saveButtonProps={saveButtonProps}
+          wrapperProps={{
+            style: {
+              maxWidth: '800px',
+              margin: '0 auto',
+              width: '100%',
+              padding: '16px'
+            },
+          }}
+    >
       <Box
-        component="form"
-        sx={{ display: "flex", flexDirection: "column" }}
-        autoComplete="off"
+          component="form"
+          sx={{ display: "flex", flexDirection: "column" }}
+          autoComplete="off"
       >
         <TextField
             {...register("firstname", {
