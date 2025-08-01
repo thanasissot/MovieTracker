@@ -26,6 +26,7 @@ export interface AppUser {
 }
 
 export interface UserMovie {
+    appUserId: number;
     movieId: number;
     movie: Movie;
     watched: boolean;
