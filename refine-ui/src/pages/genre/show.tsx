@@ -1,6 +1,6 @@
 import { Stack, Typography, Card, CardContent, Divider } from "@mui/material";
 import { useShow } from "@refinedev/core";
-import { Show, TextFieldComponent as TextField, } from "@refinedev/mui";
+import { Show,  } from "@refinedev/mui";
 
 export const GenreShow = () => {
   const { queryResult } = useShow({});

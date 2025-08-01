@@ -54,7 +54,10 @@ export const ActorShow = () => {
   };
 
   useEffect(() => {
-    fetchDefaultMovies();
+    fetchDefaultMovies().then(r => {
+      // nothing
+    });
+    // eslint-disable-next-line
   }, [movies]);
 
   // Search movies as user types

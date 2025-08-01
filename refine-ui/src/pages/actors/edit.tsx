@@ -6,13 +6,10 @@ import React from "react";
 export const ActorEdit = () => {
   const {
     saveButtonProps,
-    refineCore: { queryResult, formLoading },
+    refineCore: {formLoading },
     register,
-    control,
     formState: { errors },
   } = useForm({});
-
-  const actorData = queryResult?.data?.data;
 
   return (
     <Edit isLoading={formLoading} saveButtonProps={saveButtonProps}

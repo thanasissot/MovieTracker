@@ -1,5 +1,5 @@
 import { Box, TextField, Card, CardContent } from "@mui/material";
-import { Create, useAutocomplete } from "@refinedev/mui";
+import { Create } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
 import React from "react";
 

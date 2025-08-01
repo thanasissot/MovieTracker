@@ -22,7 +22,7 @@ import {DataGrid, GridColDef, GridRenderCellParams} from "@mui/x-data-grid";
 import {Delete as DeleteIcon} from "@mui/icons-material";
 import React, {useState, useEffect} from "react";
 import axios from "axios";
-import {type Movie, type Genre, type Actor} from "../../components/model/all";
+import {type Movie, type Genre} from "../../components/model/all";
 
 export const MovieShow = () => {
     const apiUrl = useApiUrl();
@@ -38,7 +38,9 @@ export const MovieShow = () => {
     // Fetch all genres once
     useEffect(() => {
         if (record) {
-            fetchAllGenres().then(r => console.log("Genres fetched"));
+            fetchAllGenres().then(r => {
+                // nothing
+            });
         }
     }, [record]);
 

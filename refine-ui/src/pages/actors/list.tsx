@@ -55,7 +55,9 @@ export const ActorList = () => {
     // Debounced refetch to avoid too many requests while typing
     useEffect(() => {
         const timer = setTimeout(() => {
-            refetchMovies();
+            refetchMovies().then(r  => {
+                // nothing
+            });
         }, 500);
 
         return () => clearTimeout(timer);

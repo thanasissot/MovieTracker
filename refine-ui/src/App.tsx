@@ -7,7 +7,6 @@ import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 
 import {
-  AuthPage,
   ErrorComponent,
   useNotificationProvider,
   RefineSnackbarProvider,
@@ -26,14 +25,13 @@ import routerBindings, {
 } from "@refinedev/react-router";
 import { AppIcon } from "./components/app-icon";
 import { ColorModeContextProvider } from "./contexts/color-mode";
-import { Header } from "./components/header";
 import {GenreCreate, GenreEdit, GenreList, GenreShow} from "./pages/genre";
 import {MovieCreate, MovieEdit, MovieList, MovieShow} from "./pages/movies";
 import {ActorCreate, ActorEdit, ActorList, ActorShow} from "./pages/actors";
 import { AuthProvider } from "@refinedev/core";
 import { Login } from "./pages/login";
 import axios from "axios";
-import { ConfigProvider, App as AntdApp } from "antd";
+import { App as AntdApp } from "antd";
 import { Homepage } from "./pages/homepage";
 
 const authProvider: AuthProvider = {

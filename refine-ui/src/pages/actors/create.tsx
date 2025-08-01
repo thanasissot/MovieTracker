@@ -1,5 +1,5 @@
 import { Box, TextField } from "@mui/material";
-import { Create, useAutocomplete } from "@refinedev/mui";
+import { Create } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
 import React from "react";
 
@@ -8,13 +8,8 @@ export const ActorCreate = () => {
     saveButtonProps,
     refineCore: { formLoading },
     register,
-    control,
     formState: { errors },
   } = useForm({});
-
-  const { autocompleteProps: categoryAutocompleteProps } = useAutocomplete({
-    resource: "actors",
-  });
 
   return (
       <Create isLoading={formLoading} saveButtonProps={saveButtonProps}

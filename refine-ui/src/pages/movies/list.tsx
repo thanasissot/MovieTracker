@@ -8,7 +8,7 @@ import {
 import {DataGrid, type GridColDef} from "@mui/x-data-grid";
 import {useApiUrl} from "@refinedev/core";
 import {
-    Typography, Box, FormControl, InputLabel, Select, MenuItem,
+    Box, FormControl, InputLabel, Select, MenuItem,
     Button, TextField, Autocomplete, IconButton, Dialog, DialogTitle,
     DialogContent, DialogContentText, DialogActions
 } from "@mui/material";
@@ -55,7 +55,9 @@ export const MovieList = () => {
             }
         };
 
-        fetchGenres().then(r => console.log("Genres are fetched"));
+        fetchGenres().then(r  => {
+            // nothing
+        });
     }, [apiUrl]);
 
     // Initial fetch of top actors
@@ -78,7 +80,9 @@ export const MovieList = () => {
             }
         };
 
-        fetchInitialActors();
+        fetchInitialActors().then(r  => {
+            // nothing
+        });
     }, [apiUrl]);
 
     // Function to flatten user movies
