@@ -289,8 +289,9 @@ export const MovieList = () => {
                 flex: 1,
                 align: "center",
                 headerAlign: "center",
-                renderCell: (params) =>  (
-                    <div
+                renderCell: (params) =>  {
+                    const watched = isMovieWatched(params.row.id);
+                    return (<div
                         style={{
                             width: '100%',
                             fontWeight: 500,
@@ -303,14 +304,14 @@ export const MovieList = () => {
                             padding: '6px 0 6px 16px'
                         }}
                     >
-                        {params.value ? (
+                        {watched ? (
                             <VisibilityIcon color="primary" />
                         ) : (
                             <VisibilityOffIcon color="action" sx={{ opacity: 0.6 }} />
                         )}
                     </div>
 
-                ),
+                )},
             },
             {
                 field: "favorite",
@@ -319,27 +320,30 @@ export const MovieList = () => {
                 flex: 1,
                 align: "center",
                 headerAlign: "center",
-                renderCell: (params) => (
-                    <div
-                        style={{
-                            width: '100%',
-                            fontWeight: 500,
-                            whiteSpace: 'normal',
-                            wordWrap: 'break-word',
-                            display: '-webkit-box',
-                            overflow: 'hidden',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            padding: '6px 0 6px 16px'
-                        }}
-                    >
-                        {params.value ? (
-                            <FavoriteIcon color="error" />
-                        ) : (
-                            <FavoriteBorderIcon color="action" sx={{ opacity: 0.6 }} />
-                        )}
-                    </div>
-                ),
+                renderCell: (params) => {
+                    const favorite = isMovieFavorite(params.row.id);
+                    return (
+                        <div
+                            style={{
+                                width: '100%',
+                                fontWeight: 500,
+                                whiteSpace: 'normal',
+                                wordWrap: 'break-word',
+                                display: '-webkit-box',
+                                overflow: 'hidden',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                padding: '6px 0 0px 16px'
+                            }}
+                        >
+                            {favorite ? (
+                                <FavoriteIcon color="error"/>
+                            ) : (
+                                <FavoriteBorderIcon color="action" sx={{opacity: 0.6}}/>
+                            )}
+                        </div>
+                    )
+                },
             },
             {
                 field: "actions",
@@ -465,7 +469,12 @@ export const MovieList = () => {
                     </Button>
                 )}
             </Box>
-            <DataGrid {...dataGridProps} columns={columns} filterModel={undefined} autoHeight/>
+            <DataGrid
+                {...dataGridProps}
+                columns={columns}
+                filterModel={undefined}
+                autoHeight
+            />
             <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
                 <DialogTitle>Confirm Update</DialogTitle>
                 <DialogContent>
