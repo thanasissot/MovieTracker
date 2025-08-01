@@ -6,7 +6,6 @@ import asot.me.rest.dto.UserMovieDto;
 import asot.me.rest.mapper.UserMovieMapper;
 import asot.me.rest.repository.AppUserRepository;
 import asot.me.rest.repository.UserMovieRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,18 +25,27 @@ public class UserMovieService {
                 .movieId(userMovieDto.getMovieId())
                 .build();
 
-        UserMovie userMovie = userMovieRepository.findById(userMovieId)
-                .orElseThrow(() -> new EntityNotFoundException("User-Movie not found with appUserId: "
-                        + userMovieDto.getAppUserId() + ", movieId: " + userMovieDto.getMovieId()));
+        UserMovie userMovie = userMovieRepository.findById(userMovieId).orElse(null);
+
+        if (userMovie == null){
+            userMovie = UserMovie
+                    .builder()
+                    .movieId(userMovieDto.getMovieId())
+                    .appUserId(userMovieDto.getAppUserId())
+                    .watched(userMovieDto.isWatched())
+                    .favorite(userMovieDto.isFavorite())
+                    .build();
+        } else {
+            userMovie.setFavorite(userMovieDto.isFavorite());
+            userMovie.setWatched(userMovieDto.isWatched());
+        }
 
         if (!userMovieDto.isFavorite() && !userMovieDto.isWatched()) {
             userMovieRepository.deleteById(userMovieId);
         } else {
-            userMovie.setFavorite(userMovieDto.isFavorite());
-            userMovie.setWatched(userMovieDto.isWatched());
-
             userMovieRepository.save(userMovie);
         }
+
         List<UserMovie> userMovies = userMovieRepository.findByAppUserId(userMovieDto.getAppUserId());
 
         return userMovieMapper.toDtoList(userMovies);

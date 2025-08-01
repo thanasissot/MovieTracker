@@ -1,7 +1,7 @@
 import {DataGrid, type GridColDef} from "@mui/x-data-grid";
 import {List} from "@refinedev/mui";
 import React, {useEffect, useMemo, useState} from "react";
-import {type AppUser, FlattenedUserMovie} from "../../components/model/all";
+import {type AppUser, FlattenedUserMovie, UserMovie} from "../../components/model/all";
 import {
     Button,
     Dialog,
@@ -45,7 +45,10 @@ export const Homepage = () => {
     const fetchUserMovies = () => {
         const userStr = localStorage.getItem('user');
         const parsedUser = userStr ? JSON.parse(userStr) as AppUser : null;
-        const flatMovies = flattenUserMovies(parsedUser?.userMovies);
+        let flatMovies;
+        if (parsedUser?.userMovies) {
+            flatMovies = flattenUserMovies(parsedUser?.userMovies);
+        }
         setFlatenedUserMovies(flatMovies ?? []);
         setLoading(false);
     };
@@ -98,8 +101,10 @@ export const Homepage = () => {
                 setLoading(true)
                 const userStr = localStorage.getItem('user');
                 const parsedUser = userStr ? JSON.parse(userStr) as AppUser : null;
-                parsedUser.userMovies = response.data as UserMovie[];
-                localStorage.setItem('user', JSON.stringify(parsedUser))
+                if (parsedUser) {
+                    parsedUser.userMovies = response.data;
+                    localStorage.setItem('user', JSON.stringify(parsedUser))
+                }
                 const flatMovies = flattenUserMovies(response.data as UserMovie[]);
                 setFlatenedUserMovies(flatMovies ?? []);
                 setLoading(false);
@@ -128,7 +133,7 @@ export const Homepage = () => {
                 field: "title",
                 headerName: "Title",
                 renderHeader: (params) => (
-                    <div style={{ paddingLeft: '6px', display: 'flex', alignItems: 'center', height: '100%' }}>
+                    <div style={{ paddingLeft: '12px', display: 'flex', alignItems: 'center', height: '100%' }}>
                         {params.colDef.headerName}
                     </div>
                 ),
@@ -138,7 +143,6 @@ export const Homepage = () => {
                 renderCell: (params) => (
                     <div
                         style={{
-                            lineHeight: 3,
                             width: '100%',
                             fontWeight: 500,
                             fontSize: '0.875rem',
@@ -148,7 +152,6 @@ export const Homepage = () => {
                             overflow: 'hidden',
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: 'vertical',
-                            padding: '6px'
                         }}
                     >
                         {params.value}
@@ -168,10 +171,27 @@ export const Homepage = () => {
                 width: 120,
                 align: "center",
                 headerAlign: "center",
-                renderCell: (params) => (
-                    params.value ?
-                        <VisibilityIcon color="primary" /> :
-                        <VisibilityOffIcon color="action" sx={{ opacity: 0.6 }} />
+                renderCell: (params) =>  (
+                    <div
+                        style={{
+                            width: '100%',
+                            fontWeight: 500,
+                            whiteSpace: 'normal',
+                            wordWrap: 'break-word',
+                            display: '-webkit-box',
+                            overflow: 'hidden',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            padding: '6px 0 6px 16px'
+                        }}
+                    >
+                        {params.value ? (
+                            <VisibilityIcon color="primary" />
+                        ) : (
+                            <VisibilityOffIcon color="action" sx={{ opacity: 0.6 }} />
+                        )}
+                    </div>
+
                 ),
             },
             {
@@ -181,9 +201,26 @@ export const Homepage = () => {
                 align: "center",
                 headerAlign: "center",
                 renderCell: (params) => (
-                    params.value ?
-                        <FavoriteIcon color="error" /> :
-                        <FavoriteBorderIcon color="action" sx={{ opacity: 0.6 }} />
+                        <div
+                            style={{
+                                width: '100%',
+                                fontWeight: 500,
+                                whiteSpace: 'normal',
+                                wordWrap: 'break-word',
+                                display: '-webkit-box',
+                                overflow: 'hidden',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                padding: '6px 0 6px 16px'
+                            }}
+                        >
+                            {params.value ? (
+                                <FavoriteIcon color="error" />
+                            ) : (
+                                <FavoriteBorderIcon color="action" sx={{ opacity: 0.6 }} />
+                            )}
+                        </div>
+
                 ),
             },
             {
@@ -193,7 +230,7 @@ export const Homepage = () => {
                 align: "center",
                 headerAlign: "center",
                 renderCell: (params) => (
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '7px' }}>
                         <IconButton
                             size="small"
                             onClick={() => {
@@ -232,7 +269,16 @@ export const Homepage = () => {
     if (loading) return <Typography>Loading...</Typography>;
 
     return (
-        <List>
+        <List
+            wrapperProps={{
+                style: {
+                    maxWidth: '1400px',
+                    margin: '0 auto',
+                    width: '100%',
+                    padding: '16px'
+                },
+            }}
+        >
             <DataGrid
                 rows={rows}
                 getRowId={(row) => row.movieId}
