@@ -10,12 +10,11 @@ import {
     Typography,
     Box,
     Button,
-    TextField,
-    Autocomplete,
     FormControl,
     InputLabel,
     Select,
-    MenuItem
+    MenuItem,
+    Card, CardContent,
 } from "@mui/material";
 import {useShow, useApiUrl} from "@refinedev/core";
 import {Show} from "@refinedev/mui";

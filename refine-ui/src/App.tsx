@@ -110,6 +110,13 @@ function App() {
                 authProvider={authProvider}
                 resources={[
                   {
+                    name: "Homepage",
+                    list: "/users",
+                    options: {
+                      label: "Homepage"
+                    }
+                  },
+                  {
                     name: "genres",
                     list: "/genres",
                     create: "/genres/create",
@@ -165,6 +172,9 @@ function App() {
                       index
                       element={<Homepage />}
                     />
+                    <Route path="/users">
+                      <Route index element={<Homepage />} />
+                    </Route>
                     <Route path="/genres">
                       <Route index element={<GenreList />} />
                       <Route path="create" element={<GenreCreate />} />

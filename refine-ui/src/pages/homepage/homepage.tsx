@@ -270,6 +270,7 @@ export const Homepage = () => {
 
     return (
         <List
+            title={<Typography variant="h5">Homepage</Typography>}
             wrapperProps={{
                 style: {
                     maxWidth: '1400px',

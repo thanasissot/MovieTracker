@@ -74,7 +74,10 @@ export const ActorList = () => {
         {
             field: "firstname",
             headerName: "Firstname",
-            width: 150,
+            minWidth: 150,
+            flex: 2,
+            align: "center",
+            headerAlign: "center",
             renderHeader: (params) => (
                 <div style={{ paddingLeft: '16px', display: 'flex', alignItems: 'center', height: '100%' }}>
                     {params.colDef.headerName}
@@ -102,7 +105,10 @@ export const ActorList = () => {
         {
             field: "lastname",
             headerName: "Lastname",
-            width: 150,
+            minWidth: 150,
+            flex: 2,
+            align: "center",
+            headerAlign: "center",
             renderHeader: (params) => (
                 <div style={{ paddingLeft: '16px', display: 'flex', alignItems: 'center', height: '100%' }}>
                     {params.colDef.headerName}
@@ -130,7 +136,8 @@ export const ActorList = () => {
         {
             field: "actions",
             headerName: "Actions",
-            width: 150,
+            minWidth: 150,
+            flex: 1,
             align: "center",
             headerAlign: "center",
             sortable: false,

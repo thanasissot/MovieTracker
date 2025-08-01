@@ -77,12 +77,12 @@ export const GenreList = () => {
   return (
       <List
           wrapperProps={{
-            style: {
-              maxWidth: '800px', // Constrain the width
-              mx: 'auto',       // Center horizontally
-              width: '100%',    // Take full width up to maxWidth
-              p: 2             // Add some padding
-            },
+              style: {
+                  maxWidth: '1000px',
+                  margin: '0 auto',
+                  width: '100%',
+                  padding: '16px'
+              },
           }}
       >
         <DataGrid {...dataGridProps} columns={columns} />
