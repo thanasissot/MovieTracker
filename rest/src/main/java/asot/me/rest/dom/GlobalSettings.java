@@ -20,4 +20,6 @@ public class GlobalSettings {
     private boolean genresCreated;
 
     private boolean genresUpdatedLastMonth;
+
+    private Long nextMovieIdToQuery;
 }

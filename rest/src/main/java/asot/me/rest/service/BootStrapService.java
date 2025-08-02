@@ -32,6 +32,7 @@ public class BootStrapService {
                 GlobalSettings globalSettings =
                         GlobalSettings.builder()
                             .id(1L)
+                            .nextMovieIdToQuery(0L)
                             .build();
 
                 globalSettingsRepository.save(globalSettings);
