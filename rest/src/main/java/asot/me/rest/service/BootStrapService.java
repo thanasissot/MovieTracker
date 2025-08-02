@@ -2,6 +2,7 @@ package asot.me.rest.service;
 
 import asot.me.rest.dom.*;
 import asot.me.rest.repository.*;
+import asot.me.rest.tmdb.TmdbRequestService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -20,71 +21,30 @@ public class BootStrapService {
     private final ActorRepository actorRepository;
     private final AppUserRepository appUserRepository;
     private final UserMovieRepository userMovieRepository;
+    private final GlobalSettingsRepository globalSettingsRepository;
+    private final TmdbRequestService tmdbRequestService;
 
-    public void deleteAll() {
-        log.info("Deleting all data from the database...");
-        userMovieRepository.deleteAll();
-        appUserRepository.deleteAll();
-        actorRepository.deleteAll();
-        tvShowRepository.deleteAll();
-        movieRepository.deleteAll();
-        genreRepository.deleteAll();
-        log.info("Successfully deleted all data from the database.");
-    }
+    @PostConstruct
+    public void init() {
+        log.info("BootStrapService initialized");
+        try {
+            if (globalSettingsRepository.findAll().isEmpty()) {
+                GlobalSettings globalSettings =
+                        GlobalSettings.builder()
+                            .id(1L)
+                            .build();
 
-    public void deleteByParam(String param) {
-        switch (param) {
-            case "all":
-                deleteAll();
-                break;
-            case "actors":
-                actorRepository.deleteAll();
-                log.info("Successfully deleted all actors from the database.");
-                break;
-            case "movies":
-                movieRepository.deleteAll();
-                log.info("Successfully deleted all movies from the database.");
-                break;
-            case "tvshows":
-                tvShowRepository.deleteAll();
-                log.info("Successfully deleted all TV shows from the database.");
-                break;
-            case "genres":
-                genreRepository.deleteAll();
-                log.info("Successfully deleted all genres from the database.");
-                break;
-            default:
-                log.warn("Unknown parameter: {}", param);
-        }
-    }
-
-    public void deleteByMultiParams(String ...params) {
-        for (String param : params) {
-            switch (param) {
-                case "actors":
-                    actorRepository.deleteAll();
-                    log.info("Successfully deleted all actors from the database.");
-                    break;
-                case "movies":
-                    movieRepository.deleteAll();
-                    log.info("Successfully deleted all movies from the database.");
-                    break;
-                case "tvshows":
-                    tvShowRepository.deleteAll();
-                    log.info("Successfully deleted all TV shows from the database.");
-                    break;
-                case "genres":
-                    genreRepository.deleteAll();
-                    log.info("Successfully deleted all genres from the database.");
-                    break;
-                case "all":
-                    deleteAll();
-                    return;
-                default:
-                    log.warn("Unknown parameter: {}", param);
+                globalSettingsRepository.save(globalSettings);
+                log.info("Global settings created (id=1)");
             }
+
+            tmdbRequestService.fetchGenresFromApi();
+
+        } catch (Exception e) {
+            log.error("Error during BootStrapService initialization: {}", e.getMessage());
         }
     }
+
 
     @Transactional
     public void createAll() {
@@ -220,15 +180,7 @@ public class BootStrapService {
 
     }
 
-    @PostConstruct
-    public void init() {
-        log.info("BootStrapService initialized");
-        try {
-            run();
-        } catch (Exception e) {
-            log.error("Error during BootStrapService initialization: {}", e.getMessage());
-        }
-    }
+
 
     protected List<AppUser> initializeUsers() {
         List<AppUser> users = Arrays.asList(

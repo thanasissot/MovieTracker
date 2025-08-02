@@ -23,12 +23,13 @@ public class RequestTrackingService {
 
 
     @Transactional
-    public void trackRequest(String url, String queryParams) {
+    public void trackRequest(String url, String queryParams, boolean result) {
         // Create and save request history
         RequestHistory history = RequestHistory.builder()
                 .executionDateTime(LocalDateTime.now())
                 .url(url)
                 .queryParams(queryParams)
+                .result(result)
                 .build();
         requestHistoryRepository.save(history);
 

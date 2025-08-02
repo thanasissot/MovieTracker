@@ -28,7 +28,7 @@ public class RestApplication {
     @PostConstruct
     public void printEnv() {
         try {
-            tmdbRequestService.getMovieList("genre/movie/list");
+//            tmdbRequestService.getMovieList("genre/movie/list");
         } catch (Exception e) {
             // nothing
         }

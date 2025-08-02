@@ -1,6 +1,7 @@
 package asot.me.rest.dom;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,13 +12,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Genre {
+public class GlobalSettings {
 
     @Id
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String name;
+    private boolean genresCreated;
 
-
+    private boolean genresUpdatedLastMonth;
 }

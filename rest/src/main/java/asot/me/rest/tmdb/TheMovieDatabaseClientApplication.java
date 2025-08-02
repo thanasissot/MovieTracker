@@ -9,7 +9,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 //@SpringBootApplication
 @RequiredArgsConstructor
-public class TheMovieDatabaseClientApplication implements CommandLineRunner {
+public class TheMovieDatabaseClientApplication
+//        implements CommandLineRunner
+{
 
     private final RequestTrackingService requestTrackingService;
     private final TmdbRequestService tmdbRequestService;
@@ -20,18 +22,18 @@ public class TheMovieDatabaseClientApplication implements CommandLineRunner {
 //        application.run(args);
 //    }
 
-    @Override
-    public void run(String... args) throws Exception {
-        System.out.println("Processing data without web server");
-
-        // Example API call
-        String exampleUrl = "https://api.themoviedb.org/3/movie/popular";
-        String exampleQueryParams = "api_key=your_key&language=en-US&page=1";
-
-        // Track this request
-        requestTrackingService.trackRequest(exampleUrl, exampleQueryParams);
-
-        System.out.println("Processing completed");
-    }
+//    @Override
+//    public void run(String... args) throws Exception {
+//        System.out.println("Processing data without web server");
+//
+//        // Example API call
+//        String exampleUrl = "https://api.themoviedb.org/3/movie/popular";
+//        String exampleQueryParams = "api_key=your_key&language=en-US&page=1";
+//
+//        // Track this request
+//        requestTrackingService.trackRequest(exampleUrl, exampleQueryParams);
+//
+//        System.out.println("Processing completed");
+//    }
 
 }

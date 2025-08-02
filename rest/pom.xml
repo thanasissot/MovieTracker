@@ -110,6 +110,12 @@
             <artifactId>okhttp-jvm</artifactId>
             <version>5.0.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.squareup.moshi/moshi -->
+        <dependency>
+            <groupId>com.squareup.moshi</groupId>
+            <artifactId>moshi</artifactId>
+            <version>1.15.2</version>
+        </dependency>
     </dependencies>
 
     <build>

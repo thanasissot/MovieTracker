@@ -19,11 +19,12 @@ public class RequestHistory {
     private Long id;
 
     private LocalDateTime executionDateTime;
+
     private String url;
 
     @Column(length = 2000) // For longer query parameters
     private String queryParams;
 
-
+    private boolean result;
 
 }
