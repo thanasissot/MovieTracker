@@ -4,7 +4,6 @@ import asot.me.rest.dom.GlobalSettings;
 import asot.me.rest.repository.GenreRepository;
 import asot.me.rest.repository.GlobalSettingsRepository;
 import asot.me.rest.service.RequestTrackingService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import lombok.RequiredArgsConstructor;
