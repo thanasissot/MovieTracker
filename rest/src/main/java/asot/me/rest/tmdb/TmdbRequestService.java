@@ -103,7 +103,8 @@ public class TmdbRequestService {
             if (actorSearchResponse != null && actorSearchResponse.getResults() != null) {
                 // Find exact name match (case insensitive)
                 var matchingActor = actorSearchResponse.getResults().stream()
-                        .filter(actor -> actor.getName().equalsIgnoreCase(fullname))
+                        .filter(actor -> actor.getName().equalsIgnoreCase(fullname) &&
+                                actor.getKnown_for_department().equalsIgnoreCase("Acting"))
                         .findFirst()
                         .orElse(null);
 
