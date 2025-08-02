@@ -1,4 +1,4 @@
-package asot.me.rest.tmdb;
+package asot.me.rest.tmdb.response;
 
 import asot.me.rest.dom.Genre;
 import lombok.Builder;

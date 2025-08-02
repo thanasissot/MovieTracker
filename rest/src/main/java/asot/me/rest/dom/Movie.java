@@ -16,8 +16,8 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 public class Movie {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     private String title;
     private Long year;

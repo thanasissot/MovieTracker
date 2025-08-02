@@ -1,9 +1,13 @@
 package asot.me.rest.tmdb;
 
 import asot.me.rest.dom.GlobalSettings;
+import asot.me.rest.dom.Movie;
+import asot.me.rest.repository.ActorRepository;
 import asot.me.rest.repository.GenreRepository;
 import asot.me.rest.repository.GlobalSettingsRepository;
 import asot.me.rest.service.RequestTrackingService;
+import asot.me.rest.tmdb.response.ActorSearchResponse;
+import asot.me.rest.tmdb.response.MovieListGenre;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +18,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -22,6 +32,7 @@ public class TmdbRequestService {
     private String apiToken;
     private final GenreRepository genreRepository;
     private final GlobalSettingsRepository globalSettingsRepository;
+    private final ActorRepository actorRepository;
     private final RequestTrackingService requestTrackingService;
 
     private final String BASE_URL = " https://api.themoviedb.org/3/";
@@ -29,6 +40,7 @@ public class TmdbRequestService {
     private final OkHttpClient client = new OkHttpClient();
     private final Moshi moshi = new Moshi.Builder().build();
     private final JsonAdapter<MovieListGenre> movieListGenreJsonAdapter = moshi.adapter(MovieListGenre.class);
+    private final JsonAdapter<ActorSearchResponse> actorSearchResponseJsonAdapter = moshi.adapter(ActorSearchResponse.class);
 
     // GENDERS
     public void fetchGenresFromApi() {
@@ -59,7 +71,76 @@ public class TmdbRequestService {
             }
 
         } catch (Exception e) {
-            log.error("Exception e:{}", e.getLocalizedMessage());
+            log.error("Exception fetchGenresFromApi e:{}", e.getLocalizedMessage());
+        }
+    }
+
+    public void searchActorsByName(String fullname) {
+        String[] names = fullname.split(" ", 2);
+        String firstName = names[0];
+        String lastName = names.length > 1 ? names[1] : "";
+
+        Optional<asot.me.rest.dom.Actor> exists = actorRepository.findByFirstnameIsIgnoreCaseAndLastnameIsIgnoreCase(firstName, lastName);
+        if (exists.isPresent()) {
+            log.warn("Actor already exists");
+            return;
+        }
+
+        String url = "search/person";
+        String queryParams = "query=" + fullname;
+        String fullUrl = BASE_URL + url + "?" + queryParams;
+        Request request = new Request.Builder()
+                .url(fullUrl)
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer " + apiToken)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            requestTrackingService.trackRequest(url, queryParams, response.isSuccessful());
+            ActorSearchResponse actorSearchResponse = actorSearchResponseJsonAdapter.fromJson(response.body().source());
+
+            if (actorSearchResponse != null && actorSearchResponse.getResults() != null) {
+                // Find exact name match (case insensitive)
+                var matchingActor = actorSearchResponse.getResults().stream()
+                        .filter(actor -> actor.getName().equalsIgnoreCase(fullname))
+                        .findFirst()
+                        .orElse(null);
+
+                if (matchingActor != null) {
+                    // Split name into first and last name
+                    String[] nameParts = matchingActor.getName().split(" ", 2);
+                    firstName = nameParts[0];
+                    lastName = nameParts.length > 1 ? nameParts[1] : "";
+
+                    // Create actor entity
+                    asot.me.rest.dom.Actor actorEntity = asot.me.rest.dom.Actor.builder()
+                            .firstname(firstName)
+                            .lastname(lastName)
+                            .build();
+
+                    // Create movie entities from known_for list (only movies)
+                    List<Movie> movieEntities = matchingActor.getKnown_for().stream()
+                            .filter(media -> "movie".equals(media.getMedia_type()))
+                            .map(movie -> asot.me.rest.dom.Movie.builder()
+                                    .title(movie.getTitle())
+                                    .year((long) LocalDate.parse(movie.getRelease_date()).getYear())
+                                    .id(movie.getId())
+                                    .genreIds(movie.getGenre_ids())
+                                    .build())
+                            .collect(Collectors.toList());
+
+                    // Set relationships
+                    actorEntity.setMovies(movieEntities);
+
+                    // Save to database and return
+                    actorRepository.save(actorEntity);
+
+                    log.info("Successfully stored Genre data from TMDB.");
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
