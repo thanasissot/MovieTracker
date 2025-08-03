@@ -2,6 +2,7 @@ package asot.me.rest.controller;
 
 import asot.me.rest.dto.ActorDto;
 import asot.me.rest.service.ActorService;
+import asot.me.rest.tmdb.TmdbSearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.List;
 @Log4j2
 public class ActorController {
     private final ActorService actorService;
+    private final TmdbSearchService tmdbSearchService;
 
     @GetMapping
     public ResponseEntity<List<ActorDto>> getAllActors(
@@ -61,8 +63,9 @@ public class ActorController {
     @PostMapping
     public ResponseEntity<ActorDto> createActor(
         @RequestBody ActorDto actorDto
-    ) {
-        return ResponseEntity.ok(actorService.createActor(actorDto));
+    ) throws Exception {
+        ActorDto createdActor = tmdbSearchService.searchActorsByNameAndCreate(actorDto);
+        return ResponseEntity.ok(createdActor);
     }
 
     @PutMapping("/{id}")

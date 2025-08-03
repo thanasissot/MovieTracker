@@ -26,12 +26,4 @@ public class TmdbController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/actors/{fullname}")
-    public ResponseEntity<Void> searchAndCreateActor(
-            @PathVariable("fullname") String fullname
-    ) {
-        tmdbSearchService.searchActorsByName(fullname);
-        return ResponseEntity.ok().build();
-    }
-
 }

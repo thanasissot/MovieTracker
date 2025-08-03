@@ -201,7 +201,9 @@ export const MovieList = () => {
         try {
             await axios.get(`${apiUrl}/movies/queried/${queryMovieId}`);
             // Refresh data after successful query
-            await refetch();
+            await refetch().then(() => {
+                // nothing
+            });
         } catch (error) {
             console.error("Error querying movie from TMDB:", error);
         } finally {

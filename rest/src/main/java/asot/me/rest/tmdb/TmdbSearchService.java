@@ -3,7 +3,9 @@ package asot.me.rest.tmdb;
 import asot.me.rest.dom.Actor;
 import asot.me.rest.dom.GlobalSettings;
 import asot.me.rest.dom.Movie;
+import asot.me.rest.dto.ActorDto;
 import asot.me.rest.dto.MovieDto;
+import asot.me.rest.mapper.ActorMapper;
 import asot.me.rest.mapper.MovieMapper;
 import asot.me.rest.repository.ActorRepository;
 import asot.me.rest.repository.GenreRepository;
@@ -23,6 +25,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +47,7 @@ public class TmdbSearchService {
     private final MovieRepository movieRepository;
     private final RequestTrackingService requestTrackingService;
     private final MovieMapper movieMapper;
+    private final ActorMapper actorMapper;
 
     private final String BASE_URL = " https://api.themoviedb.org/3/";
 
@@ -86,20 +92,20 @@ public class TmdbSearchService {
         }
     }
 
-    public void searchActorsByName(String fullname) {
-        String[] names = fullname.split(" ", 2);
-        String firstName = names[0];
-        String lastName = names.length > 1 ? names[1] : "";
+    public ActorDto searchActorsByNameAndCreate(ActorDto actorDto) throws Exception {
+        String firstName = actorDto.getFirstname();
+        String lastName = actorDto.getLastname();
 
-        Optional<asot.me.rest.dom.Actor> exists = actorRepository.findByFirstnameIsIgnoreCaseAndLastnameIsIgnoreCase(firstName, lastName);
+        Optional<Actor> exists = actorRepository.findByFirstnameIsIgnoreCaseAndLastnameIsIgnoreCase(firstName, lastName);
         if (exists.isPresent()) {
             log.warn("Actor already exists");
-            return;
+            throw new Exception(String.format("Actor with firstName:%s and lastName:%s, already exists.", firstName, lastName));
         }
 
         String url = "search/person";
-        String queryParams = "query=" + fullname;
-        String fullUrl = BASE_URL + url + "?" + queryParams;
+        String fullname = String.format("%s %s", firstName, lastName);
+        String queryParams = "?query=".concat(fullname);
+        String fullUrl = BASE_URL + url + queryParams;
         Request request = new Request.Builder()
                 .url(fullUrl)
                 .get()
@@ -108,52 +114,63 @@ public class TmdbSearchService {
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
-            requestTrackingService.trackRequest(url, queryParams, response.isSuccessful());
+            if (!response.isSuccessful()) {
+                requestTrackingService.trackRequest(url, queryParams, false);
+                throw new IOException("Unexpected code " + response);
+            }
+
+            requestTrackingService.trackRequest(url, queryParams, true);
             ActorSearchResponse actorSearchResponse = actorSearchResponseJsonAdapter.fromJson(response.body().source());
 
-            if (actorSearchResponse != null && actorSearchResponse.getResults() != null) {
-                // Find exact name match (case insensitive)
-                var matchingActor = actorSearchResponse.getResults().stream()
-                        .filter(actor -> actor.getName().equalsIgnoreCase(fullname) &&
-                                actor.getKnown_for_department().equalsIgnoreCase("Acting"))
-                        .findFirst()
-                        .orElse(null);
-
-                if (matchingActor != null) {
-                    // Split name into first and last name
-                    String[] nameParts = matchingActor.getName().split(" ", 2);
-                    firstName = nameParts[0];
-                    lastName = nameParts.length > 1 ? nameParts[1] : "";
-
-                    // Create actor entity
-                    asot.me.rest.dom.Actor actorEntity = asot.me.rest.dom.Actor.builder()
-                            .firstname(firstName)
-                            .lastname(lastName)
-                            .build();
-
-                    // Create movie entities from known_for list (only movies)
-                    List<Movie> movieEntities = matchingActor.getKnown_for().stream()
-                            .filter(media -> "movie".equals(media.getMedia_type()))
-                            .map(movie -> asot.me.rest.dom.Movie.builder()
-                                    .title(movie.getTitle())
-                                    .year((long) LocalDate.parse(movie.getRelease_date()).getYear())
-                                    .id(movie.getId())
-                                    .genreIds(movie.getGenre_ids())
-                                    .build())
-                            .collect(Collectors.toList());
-
-                    // Set relationships
-                    actorEntity.setMovies(movieEntities);
-
-                    // Save to database and return
-                    actorRepository.save(actorEntity);
-
-                    log.info("Successfully stored Genre data from TMDB.");
-                }
+            if (actorSearchResponse == null || actorSearchResponse.getResults().isEmpty()) {
+                throw new Exception("actorSearchResponse was null or no results");
             }
+
+                // Find exact name match (case insensitive)
+            var matchingActor = actorSearchResponse.getResults().stream()
+                    .filter(actor -> actor.getName().equalsIgnoreCase(fullname) &&
+                            actor.getKnown_for_department().equalsIgnoreCase("Acting"))
+                    .findFirst()
+                    .orElse(null);
+
+            if (matchingActor == null) {
+                throw new Exception("actorSearchResponse results had no exact match for " + fullname);
+            }
+
+            // Split name into first and last name
+            String[] nameParts = matchingActor.getName().split(" ", 2);
+            firstName = nameParts[0];
+            lastName = nameParts.length > 1 ? nameParts[1] : "";
+
+            // Create actor entity
+            Actor actorEntity = Actor.builder()
+                    .id(matchingActor.getId())
+                    .firstname(firstName)
+                    .lastname(lastName)
+                    .build();
+
+            // Create movie entities from known_for list (only movies)
+            List<Movie> movieEntities = matchingActor.getKnown_for().stream()
+                    .filter(media -> "movie".equals(media.getMedia_type()))
+                    .map(movie -> asot.me.rest.dom.Movie.builder()
+                            .title(movie.getTitle())
+                            .year((long) LocalDate.parse(movie.getRelease_date()).getYear())
+                            .id(movie.getId())
+                            .genreIds(movie.getGenre_ids())
+                            .build())
+                    .collect(Collectors.toList());
+
+            // Set relationships
+            actorEntity.setMovies(movieEntities);
+
+            // Save to database and return
+            Actor actor = actorRepository.save(actorEntity);
+            log.info("Successfully stored Actor data from TMDB.");
+            return actorMapper.toDTO(actor);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
     }
 
     public MovieDto searchAndCreateMovie(MovieDto movieDto) throws Exception {
