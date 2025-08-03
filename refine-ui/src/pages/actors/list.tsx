@@ -1,8 +1,4 @@
-import { DataGrid,
-    GridActionsCellItem,
-    type GridColDef,
-    GridToolbar
-} from "@mui/x-data-grid";
+import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import {
   DeleteButton,
   EditButton,
@@ -10,13 +6,20 @@ import {
   ShowButton,
   useDataGrid,
 } from "@refinedev/mui";
-import {  useList } from "@refinedev/core";
-import { FormControl, InputLabel, Select, MenuItem, Box, TextField, InputAdornment, IconButton, SelectChangeEvent } from "@mui/material";
-import ClearIcon from '@mui/icons-material/Clear';
+import {HttpError, useList} from "@refinedev/core";
+import { FormControl, InputLabel, Select, MenuItem, Box, TextField,
+    Autocomplete, Button } from "@mui/material";
 import React, { useState, useEffect } from "react";
-import {Actor} from "../../components/model/all";
+import {type Genre, type Actor, FlattenedUserMovie, AppUser, UserMovie, Movie} from "../../components/model/all";
 
 export const ActorList = () => {
+    const [genres, setGenres] = useState<Genre[]>([]);
+    const [selectedGenreId, setSelectedGenreId] = useState<number | "">("");
+    const [movies, setMovies] = useState<Movie[]>([]);
+    const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+    const [movieInputValue, setMovieInputValue] = useState("");
+    const [movieLoading, setMovieLoading] = useState(false);
+
     const [movieId, setMovieId] = useState<number | null>(null);
     const [movieSearch, setMovieSearch] = useState("");
 
@@ -27,50 +30,58 @@ export const ActorList = () => {
                 {
                     field: "movieId",
                     operator: "eq",
-                    value: movieId,
+                    value: selectedMovie?.id || undefined,
                 },
             ],
         },
         syncWithLocation: true,
     });
 
-    console.log(dataGridProps)
-
-    const { data: moviesData, refetch: refetchMovies } = useList({
+    const { data: moviesData, refetch: refetchMovies, isLoading: moviesDataIsLoading  } = useList<Movie, HttpError>({
         resource: "movies",
+        pagination: {
+            current: 1,
+            pageSize: 10,
+            mode: "server"
+        },
         filters: [
             {
                 field: "title",
                 operator: "contains",
-                value: movieSearch.length > 0 ? movieSearch : undefined,
-            }
+                value: selectedMovie ? undefined : (movieInputValue || undefined),
+            },
+            {
+                field: "genreId",
+                operator: "eq",
+                value: selectedGenreId || undefined,
+            },
         ],
     });
 
-    const movies = moviesData?.data || [];
+    const { data: genresData, isLoading: genresDataIsLoading } = useList<Genre, HttpError>({
+        resource: "genres",
+        pagination: {
+            mode: "off"
+        }
+    });
 
-    const handleMovieChange = (event: SelectChangeEvent<number | string>) => {
-        setMovieId(event.target.value === "" ? null : Number(event.target.value));
-    };
-
-    const handleMovieSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setMovieSearch(event.target.value);
-    };
-
-    const handleClearSearch = () => {
-        setMovieSearch("");
-    };
-
-    // Debounced refetch to avoid too many requests while typing
     useEffect(() => {
-        const timer = setTimeout(() => {
-            refetchMovies().then(r  => {
-                // nothing
-            });
-        }, 500);
+        if (!genresDataIsLoading) {
+            setGenres(genresData?.data ?? []);
+        }
 
-        return () => clearTimeout(timer);
-    }, [movieSearch, refetchMovies]);
+        if (!moviesDataIsLoading) {
+            setMovies(moviesData?.data ?? []);
+            setMovieLoading(false);
+        }
+    }, [genresData, moviesData])
+
+    // Clear all filters
+    const handleClearFilters = () => {
+        setSelectedGenreId("");
+        setSelectedMovie(null);
+        setMovieInputValue(""); // Clear the input value
+    };
 
   const columns = React.useMemo<GridColDef[]>(
     () => [
@@ -175,54 +186,73 @@ export const ActorList = () => {
     <List
         wrapperProps={{
             style: {
-                maxWidth: '1800px',
+                maxWidth: '1400px',
                 margin: '0 auto',
                 width: '100%',
                 padding: '16px'
             },
         }}
     >
-        <Box display="flex" flexDirection="column" gap={2}>
-            <TextField
-                label="Search Movies"
-                variant="outlined"
-                value={movieSearch}
-                onChange={handleMovieSearchChange}
-                fullWidth
-                InputProps={{
-                    endAdornment: (
-                        <InputAdornment position="end">
-                            {movieSearch && (
-                                <IconButton
-                                    aria-label="clear search"
-                                    onClick={handleClearSearch}
-                                    edge="end"
-                                >
-                                    <ClearIcon />
-                                </IconButton>
-                            )}
-                        </InputAdornment>
-                    ),
+        <Box sx={{display: "flex", mb: 2, gap: 1, flexWrap: "wrap"}}>
+            <Autocomplete
+                sx={{ minWidth: 200 }}
+                options={genres}
+                value={genres.find(genre => genre.id === selectedGenreId) || null}
+                onChange={(event, newValue) => {
+                    setSelectedGenreId(newValue?.id || "");
+                }}
+                getOptionLabel={(option) => option.name}
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        label="Filter by Genre"
+                        variant="outlined"
+                    />
+                )}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                filterOptions={(options, state) => {
+                    return options.filter(option =>
+                        option.name.toLowerCase().includes(state.inputValue.toLowerCase())
+                    );
                 }}
             />
-            <FormControl fullWidth variant="outlined">
-                <InputLabel id="movie-select-label">Filter by Movie</InputLabel>
-                <Select
-                    labelId="movie-select-label"
-                    value={movieId || ""}
-                    onChange={handleMovieChange}
-                    label="Filter by Movie"
+
+            {/* Actor Filter */}
+            <Autocomplete
+                sx={{minWidth: 250}}
+                options={movies}
+                loading={movieLoading}
+                value={selectedMovie}
+                onChange={(event, newValue) => {
+                    setSelectedMovie(newValue);
+                }}
+                inputValue={movieInputValue}
+                onInputChange={(event, newInputValue) => {
+                    setMovieInputValue(newInputValue);
+                }}
+                getOptionLabel={(option) => {
+                    return option.title;
+                }}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        label="Search Movie"
+                        variant="outlined"
+                    />
+                )}
+            />
+
+            {/* Clear Filters Button */}
+            {(selectedGenreId || selectedMovie) && (
+                <Button
+                    variant="outlined"
+                    onClick={handleClearFilters}
+                    sx={{height: 56}}
                 >
-                    <MenuItem value="">
-                        <em>All Actors</em>
-                    </MenuItem>
-                    {movies.map((movie) => (
-                        <MenuItem key={movie.id} value={movie.id}>
-                            {movie.title || `Movie ${movie.id}`}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
+                    Clear Filters
+                </Button>
+            )}
         </Box>
       <DataGrid
           {...dataGridProps}

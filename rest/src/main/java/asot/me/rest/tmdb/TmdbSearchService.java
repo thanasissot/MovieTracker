@@ -213,67 +213,67 @@ public class TmdbSearchService {
     public void searchMovieDetailsAndAddActors(Long id) throws Exception {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + id));
 
-//        if (movie.isQueried()) {
-//            throw new Exception(String.format("Movie with id:%s is already queried", id));
-//        }
-//
-//        String url = String.format("/movie/%s/credits", id);
-//        String fullUrl = BASE_URL.concat(url);
-//
-//        Request request = new Request.Builder()
-//                .url(fullUrl)
-//                .get()
-//                .addHeader("accept", "application/json")
-//                .addHeader("Authorization", "Bearer " + apiToken)
-//                .build();
-//
-//        try (Response response = client.newCall(request).execute()) {
-//            if (!response.isSuccessful()) {
-//                requestTrackingService.trackRequest(url, null, false);
-//                throw new IOException("Unexpected code " + response);
-//            }
-//            requestTrackingService.trackRequest(url, null, true);
-//            Credits credits = creditsJsonAdapter.fromJson(response.body().source());
-//            if (credits == null) {
-//                throw new Exception("credits was null");
-//            }
-//
-//            int counter = 1;
-//            for (TmdbCastMember castMember : credits.getCast()) {
-//                Optional<Actor> optionalActor = actorRepository.findById(castMember.getId());
-//
-//                if (optionalActor.isPresent()) {
-//                    Actor actor = optionalActor.get();
-//                    // Check if this movie is already in the actor's movies
-//                    if (actor.getMovies().stream().noneMatch(m -> m.getId().equals(movie.getId()))) {
-//                        actor.getMovies().add(movie);
-//                        actorRepository.save(actor);
-//                    }
-//                }
-//                else {
-//                    String[] nameParts = castMember.getName().split(" ", 2);
-//                    String firstName = nameParts[0];
-//                    String lastName = nameParts.length > 1 ? nameParts[1] : "";
-//
-//                    Actor actor = Actor.builder()
-//                            .id(castMember.getId())
-//                            .firstname(firstName)
-//                            .lastname(lastName)
-//                            .movies(new ArrayList<>(List.of(movie)))
-//                            .build();
-//
-//                    actorRepository.save(actor);
-//                }
-//
-//                if (counter++ >= maxCastQuery) {
-//                    break;
-//                }
-//            }
+        if (movie.isQueried()) {
+            throw new Exception(String.format("Movie with id:%s is already queried", id));
+        }
+
+        String url = String.format("/movie/%s/credits", id);
+        String fullUrl = BASE_URL.concat(url);
+
+        Request request = new Request.Builder()
+                .url(fullUrl)
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer " + apiToken)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                requestTrackingService.trackRequest(url, null, false);
+                throw new IOException("Unexpected code " + response);
+            }
+            requestTrackingService.trackRequest(url, null, true);
+            Credits credits = creditsJsonAdapter.fromJson(response.body().source());
+            if (credits == null) {
+                throw new Exception("credits was null");
+            }
+
+            int counter = 1;
+            for (TmdbCastMember castMember : credits.getCast()) {
+                Optional<Actor> optionalActor = actorRepository.findById(castMember.getId());
+
+                if (optionalActor.isPresent()) {
+                    Actor actor = optionalActor.get();
+                    // Check if this movie is already in the actor's movies
+                    if (actor.getMovies().stream().noneMatch(m -> m.getId().equals(movie.getId()))) {
+                        actor.getMovies().add(movie);
+                        actorRepository.save(actor);
+                    }
+                }
+                else {
+                    String[] nameParts = castMember.getName().split(" ", 2);
+                    String firstName = nameParts[0];
+                    String lastName = nameParts.length > 1 ? nameParts[1] : "";
+
+                    Actor actor = Actor.builder()
+                            .id(castMember.getId())
+                            .firstname(firstName)
+                            .lastname(lastName)
+                            .movies(new ArrayList<>(List.of(movie)))
+                            .build();
+
+                    actorRepository.save(actor);
+                }
+
+                if (counter++ >= maxCastQuery) {
+                    break;
+                }
+            }
 
             // Mark movie as queried and save it
             movie.setQueried(true);
             movieRepository.save(movie);
-//        }
+        }
     }
 
     private GlobalSettings getGlobalSettings() {

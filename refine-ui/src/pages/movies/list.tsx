@@ -14,7 +14,6 @@ import {
 import React, {useState, useEffect} from "react";
 import axios from "axios";
 import {type Genre, type Actor, FlattenedUserMovie, AppUser, UserMovie, Movie} from "../../components/model/all";
-import {debounce} from 'lodash';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -439,24 +438,28 @@ export const MovieList = () => {
             }}
         >
             <Box sx={{display: "flex", mb: 2, gap: 1, flexWrap: "wrap"}}>
-                <FormControl variant="outlined" sx={{minWidth: 200}}>
-                    <InputLabel id="genre-filter-label">Filter by Genre</InputLabel>
-                    <Select
-                        labelId="genre-filter-label"
-                        value={selectedGenreId}
-                        onChange={(e) => setSelectedGenreId(e.target.value as number)}
-                        label="Filter by Genre"
-                    >
-                        <MenuItem value="">
-                            <em>All Genres</em>
-                        </MenuItem>
-                        {genres.map((genre) => (
-                            <MenuItem key={genre.id} value={genre.id}>
-                                {genre.name}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                <Autocomplete
+                    sx={{ minWidth: 200 }}
+                    options={genres}
+                    value={genres.find(genre => genre.id === selectedGenreId) || null}
+                    onChange={(event, newValue) => {
+                        setSelectedGenreId(newValue?.id || "");
+                    }}
+                    getOptionLabel={(option) => option.name}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            label="Filter by Genre"
+                            variant="outlined"
+                        />
+                    )}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    filterOptions={(options, state) => {
+                        return options.filter(option =>
+                            option.name.toLowerCase().includes(state.inputValue.toLowerCase())
+                        );
+                    }}
+                />
 
                 {/* Actor Filter */}
                 <Autocomplete
