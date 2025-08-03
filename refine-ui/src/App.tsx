@@ -116,17 +116,10 @@ function App() {
                   {
                     name: "genres",
                     list: "/genres",
-                    create: "/genres/create",
-                    edit: "/genres/edit/:id",
-                    show: "/genres/show/:id",
-                    meta: {
-                      canDelete: true,
-                    },
                   },
                   {
                     name: "movies",
                     list: "/movies",
-                    create: "/movies/create",
                     show: "/movies/show/:id",
                     meta: {
                       canDelete: true,
@@ -149,6 +142,15 @@ function App() {
                   useNewQueryKeys: true,
                   projectId: "CvRzHH-QBM2sm-09smWv",
                   title: { text: "Refine Project", icon: <AppIcon /> },
+                  reactQuery: {
+                    clientConfig: {
+                      defaultOptions: {
+                        queries: {
+                          staleTime: Infinity,
+                        },
+                      },
+                    },
+                  },
                 }}
               >
                 <Routes>
@@ -173,8 +175,6 @@ function App() {
                     </Route>
                     <Route path="/genres">
                       <Route index element={<GenreList />} />
-                      <Route path="create" element={<GenreCreate />} />
-                      <Route path="show/:id" element={<GenreShow />} />
                     </Route>
                     <Route path="/movies">
                       <Route index element={<MovieList />} />

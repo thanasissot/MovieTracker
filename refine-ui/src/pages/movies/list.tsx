@@ -5,7 +5,7 @@ import {
     useDataGrid,
 } from "@refinedev/mui";
 import {DataGrid, type GridColDef} from "@mui/x-data-grid";
-import {useApiUrl} from "@refinedev/core";
+import {HttpError, useApiUrl, useList} from "@refinedev/core";
 import {
     Box, FormControl, InputLabel, Select, MenuItem,
     Button, TextField, Autocomplete, IconButton, Dialog, DialogTitle,
@@ -43,52 +43,51 @@ export const MovieList = () => {
     const [queryMovieId, setQueryMovieId] = useState<number | null>(null);
     const { tableQueryResult: { refetch } } = useTable();
 
-    // Fetch all genres once when component mounts
-    useEffect(() => {
-        const fetchGenres = async () => {
-            try {
-                const response = await axios.get(`${apiUrl}/genres`, {
-                    params: {
-                        _sort: 'name',
-                        _order: 'asc'
-                    }
-                });
-                setGenres(response.data);
-            } catch (error) {
-                console.error("Error fetching genres:", error);
+    const useListPropsGenres = useList<Genre, HttpError>({
+        resource: "genres",
+        pagination: {
+            mode: "off"
+        }
+    });
+
+    const useListPropsActors = useList<Actor, HttpError>({
+        resource: "actors",
+        pagination: {
+            current: 1,
+            pageSize: 10,
+            mode: "server"
+        },
+        sorters: [
+            {
+                field: 'id',
+                order: "asc"
             }
-        };
+        ],
+        filters: [
+            {
+                field: "name_like",
+                operator: "eq",
+                value: selectedActor ? undefined : (actorInputValue || undefined),
+            },
+        ]
+    })
 
-        fetchGenres().then(r  => {
-            // nothing
-        });
-    }, [apiUrl]);
+    const genresFromResource = useListPropsGenres?.data?.data ?? [];
+    const defaultActorsFromResource = useListPropsActors?.data?.data ?? [];
 
-    // Initial fetch of top actors
     useEffect(() => {
-        const fetchInitialActors = async () => {
-            try {
-                setActorLoading(true);
-                const response = await axios.get(`${apiUrl}/actors`, {
-                    params: {
-                        _start: 0,
-                        _end: 10,
-                        _sort: 'lastname',
-                        _order: 'asc'
-                    }
-                });
-                setActors(response.data);
-                setActorLoading(false);
-            } catch (error) {
-                console.error("Error fetching actors:", error);
-                setActorLoading(false);
-            }
-        };
+        fetchUserMovies();
 
-        fetchInitialActors().then(r  => {
-            // nothing
-        });
-    }, [apiUrl]);
+        if (!useListPropsGenres?.isLoading) {
+            setGenres(genresFromResource);
+        }
+
+        if (!useListPropsActors?.isLoading) {
+            setActors(defaultActorsFromResource);
+            setActorLoading(false);
+        }
+
+    }, [genresFromResource, defaultActorsFromResource])
 
     // Function to flatten user movies
     function flattenUserMovies(userMovies: any[]) {
@@ -111,47 +110,11 @@ export const MovieList = () => {
         setFlatenedUserMovies(flatMovies);
     };
 
-    useEffect(() => {
-        fetchUserMovies();
-    }, []);
-
-    // Debounced search for actors
-    const debouncedFetchActors = React.useCallback(
-        debounce(async (searchQuery: string) => {
-            try {
-                setActorLoading(true);
-                const response = await axios.get(`${apiUrl}/actors`, {
-                    params: {
-                        ...(searchQuery ? {name_like: searchQuery} : {}),
-                        _start: 0,
-                        _end: 10,
-                        _sort: 'lastname',
-                        _order: 'asc'
-                    }
-                });
-                setActors(response.data);
-                setActorLoading(false);
-            } catch (error) {
-                console.error("Error searching actors:", error);
-                setActorLoading(false);
-            }
-        }, 500),
-        [apiUrl]
-    );
-
-    // Handle actor input change
-    useEffect(() => {
-        debouncedFetchActors(actorInputValue);
-    }, [actorInputValue, debouncedFetchActors]);
-
-
     // Clear all filters
-    // Modify the handleClearFilters function to reset actor options
     const handleClearFilters = () => {
         setSelectedGenreId("");
         setSelectedActor(null);
         setActorInputValue(""); // Clear the input value
-        debouncedFetchActors(""); // Fetch the default actors
     };
 
     // Handle updating watched/favorite status
@@ -554,7 +517,6 @@ export const MovieList = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-            // Add the query dialog component at the bottom of the component (after the existing Dialog)
             <Dialog open={queryDialogOpen} onClose={() => setQueryDialogOpen(false)}>
                 <DialogTitle>Confirm Query</DialogTitle>
                 <DialogContent>

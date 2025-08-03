@@ -10,7 +10,12 @@ import React from "react";
 import { Box } from "@mui/material";
 
 export const GenreList = () => {
-  const { dataGridProps } = useDataGrid({});
+  const { dataGridProps } = useDataGrid({
+      resource: "genres",
+      pagination: {
+          mode: "off"
+      }
+  });
 
   const columns = React.useMemo<GridColDef[]>(
       () => [
@@ -85,7 +90,12 @@ export const GenreList = () => {
               },
           }}
       >
-        <DataGrid {...dataGridProps} columns={columns} />
+        <DataGrid
+            hideFooter={true}
+            hideFooterPagination={true}
+            {...dataGridProps}
+            columns={columns}
+        />
       </List>
   );
 };
