@@ -2,12 +2,16 @@ package asot.me.rest.tmdb;
 
 import asot.me.rest.dom.GlobalSettings;
 import asot.me.rest.dom.Movie;
+import asot.me.rest.dto.MovieDto;
+import asot.me.rest.mapper.MovieMapper;
 import asot.me.rest.repository.ActorRepository;
 import asot.me.rest.repository.GenreRepository;
 import asot.me.rest.repository.GlobalSettingsRepository;
+import asot.me.rest.repository.MovieRepository;
 import asot.me.rest.service.RequestTrackingService;
 import asot.me.rest.tmdb.response.ActorSearchResponse;
 import asot.me.rest.tmdb.response.MovieListGenre;
+import asot.me.rest.tmdb.response.MovieSearchResponse;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +31,15 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Log4j2
-public class TmdbRequestService {
+public class TmdbSearchService {
     @Value("${TMDB:asd}")
     private String apiToken;
-    private final GenreRepository genreRepository;
     private final GlobalSettingsRepository globalSettingsRepository;
+    private final GenreRepository genreRepository;
     private final ActorRepository actorRepository;
+    private final MovieRepository movieRepository;
     private final RequestTrackingService requestTrackingService;
+    private final MovieMapper movieMapper;
 
     private final String BASE_URL = " https://api.themoviedb.org/3/";
 
@@ -41,6 +47,8 @@ public class TmdbRequestService {
     private final Moshi moshi = new Moshi.Builder().build();
     private final JsonAdapter<MovieListGenre> movieListGenreJsonAdapter = moshi.adapter(MovieListGenre.class);
     private final JsonAdapter<ActorSearchResponse> actorSearchResponseJsonAdapter = moshi.adapter(ActorSearchResponse.class);
+    private final JsonAdapter<MovieSearchResponse> movieSearchResponseJsonAdapter = moshi.adapter(MovieSearchResponse.class);
+
 
     // GENDERS
     public void fetchGenresFromApi() {
@@ -143,6 +151,64 @@ public class TmdbRequestService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public MovieDto searchAndCreateMovie(MovieDto movieDto) throws Exception {
+        String movieTitle = movieDto.getTitle();
+
+        Movie movie = movieRepository.findByTitleIs(movieTitle).orElse(
+                Movie.builder().title(movieTitle).year(movieDto.getYear()).build()
+        );
+
+        if (movie.getId() != null) {
+            throw new Exception(String.format("Movie with title:%s, already exists.", movieTitle));
+        }
+
+        // search tmdb api
+        String url = "search/movie?";
+        String queryParams = String.format("query=%s&primary_release_year=%s", movieTitle, movieDto.getYear());
+        String fullUrl = BASE_URL.concat(url).concat(queryParams);
+        Request request = new Request.Builder()
+                .url(fullUrl)
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer " + apiToken)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                requestTrackingService.trackRequest(url, queryParams, false);
+                throw new IOException("Unexpected code " + response);
+            }
+
+            MovieSearchResponse movieSearchResponse = movieSearchResponseJsonAdapter.fromJson(response.body().source());
+
+            if (movieSearchResponse == null) {
+                throw new Exception("movieSearchResponse was null");
+            }
+            var matchingMovie = movieSearchResponse.getResults().stream()
+                    .filter(movieSearchResult ->
+                            movieSearchResult.getTitle().equalsIgnoreCase(movieTitle) ||
+                                    movieSearchResult.getOriginal_title().equalsIgnoreCase(movieTitle))
+                    .findFirst()
+                    .orElse(null);
+
+            if (matchingMovie != null) {
+                log.info("Movie found with id={}, creating new entry...", matchingMovie.getId());
+                movie.setId(matchingMovie.getId());
+                movie.setGenreIds(matchingMovie.getGenre_ids());
+                movie.setQueried(false);
+                movie = movieRepository.save(movie);
+                log.info("Movie ''{}'' was created", movie.getTitle());
+                return movieMapper.toDTO(movie);
+            }
+        }
+
+        throw new Exception("Code should never reach this point: searchAndCreateMovie");
+    }
+
+    public void searchMovieDetailsAndAddActors(Long id) {
+
     }
 
     private GlobalSettings getGlobalSettings() {

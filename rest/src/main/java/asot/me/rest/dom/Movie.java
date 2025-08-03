@@ -19,6 +19,7 @@ public class Movie {
 
     @Id
     private Long id;
+    @Column(unique = true)
     private String title;
     private Long year;
 
@@ -29,5 +30,7 @@ public class Movie {
     @JsonIgnore
     @ManyToMany(mappedBy = "movies", targetEntity = Actor.class)
     private Set<Actor> actors = new HashSet<>();
+
+    private boolean queried;
 
 }

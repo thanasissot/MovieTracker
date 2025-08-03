@@ -14,4 +14,5 @@ public class MovieDto {
     private Long year;
     private List<Actor> actors;
     private List<Long> genreIds;
+    private boolean queried;
 }

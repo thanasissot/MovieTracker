@@ -2,6 +2,7 @@ package asot.me.rest.controller;
 
 import asot.me.rest.dto.MovieDto;
 import asot.me.rest.service.MovieService;
+import asot.me.rest.tmdb.TmdbSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MovieController {
     private final MovieService movieService;
+    private final TmdbSearchService tmdbSearchService;
 
     @GetMapping
     public ResponseEntity<List<MovieDto>> getAllMovies(
@@ -52,8 +54,8 @@ public class MovieController {
     @PostMapping
     public ResponseEntity<MovieDto> createMovie(
         @RequestBody MovieDto movieDto
-    ) {
-        MovieDto createdMovie = movieService.createMovie(movieDto);
+    ) throws Exception {
+        MovieDto createdMovie = tmdbSearchService.searchAndCreateMovie(movieDto);
         return ResponseEntity.ok(createdMovie);
     }
 

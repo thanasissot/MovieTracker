@@ -14,12 +14,14 @@ import {
 } from "@mui/material";
 import React, {useState, useEffect} from "react";
 import axios from "axios";
-import {type Genre, type Actor, FlattenedUserMovie, AppUser, UserMovie} from "../../components/model/all";
+import {type Genre, type Actor, FlattenedUserMovie, AppUser, UserMovie, Movie} from "../../components/model/all";
 import {debounce} from 'lodash';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import TvOffIcon from '@mui/icons-material/TvOff';
 
 export const MovieList = () => {
     const apiUrl = useApiUrl();
@@ -309,9 +311,9 @@ export const MovieList = () => {
                         }}
                     >
                         {watched ? (
-                            <VisibilityIcon color="primary" />
+                            <VisibilityIcon color="success" />
                         ) : (
-                            <VisibilityOffIcon color="action" sx={{ opacity: 0.6 }} />
+                            <VisibilityOffIcon color="error" sx={{ opacity: 0.6 }} />
                         )}
                     </div>
 
@@ -341,13 +343,44 @@ export const MovieList = () => {
                             }}
                         >
                             {favorite ? (
-                                <FavoriteIcon color="error"/>
+                                <FavoriteIcon color="success"/>
                             ) : (
-                                <FavoriteBorderIcon color="action" sx={{opacity: 0.6}}/>
+                                <FavoriteBorderIcon color="error" sx={{opacity: 0.6}}/>
                             )}
                         </div>
                     )
                 },
+            },
+            {
+                field: "queried",
+                headerName: "Queried",
+                minWidth: 60,
+                flex: 1,
+                align: "center",
+                headerAlign: "center",
+                renderCell: (params) =>  {
+                    const queried = (params.row as Movie)?.queried;
+                    return (<div
+                            style={{
+                                width: '100%',
+                                fontWeight: 500,
+                                whiteSpace: 'normal',
+                                wordWrap: 'break-word',
+                                display: '-webkit-box',
+                                overflow: 'hidden',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                padding: '6px 0 6px 16px'
+                            }}
+                        >
+                            {queried ? (
+                                <CheckCircleIcon color="success" />
+                            ) : (
+                                <TvOffIcon color="error" sx={{ opacity: 0.6 }} />
+                            )}
+                        </div>
+
+                    )},
             },
             {
                 field: "actions",

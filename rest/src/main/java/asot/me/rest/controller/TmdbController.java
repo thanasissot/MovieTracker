@@ -1,7 +1,7 @@
 package asot.me.rest.controller;
 
 import asot.me.rest.tmdb.TmdbMovieQueryProcess;
-import asot.me.rest.tmdb.TmdbRequestService;
+import asot.me.rest.tmdb.TmdbSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/tmdb")
 @RequiredArgsConstructor
 public class TmdbController {
-    private final TmdbRequestService tmdbRequestService;
+    private final TmdbSearchService tmdbSearchService;
     private final TmdbMovieQueryProcess movieQueryProcess;
 
     @GetMapping("/genres")
     public ResponseEntity<Void> createGenres() {
-        tmdbRequestService.fetchGenresFromApi();
+        tmdbSearchService.fetchGenresFromApi();
         return ResponseEntity.ok().build();
     }
 
@@ -30,7 +30,7 @@ public class TmdbController {
     public ResponseEntity<Void> searchAndCreateActor(
             @PathVariable("fullname") String fullname
     ) {
-        tmdbRequestService.searchActorsByName(fullname);
+        tmdbSearchService.searchActorsByName(fullname);
         return ResponseEntity.ok().build();
     }
 

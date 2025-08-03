@@ -5,6 +5,7 @@ export interface Movie {
     genres: Genre[];
     genreIds?: number[];
     actors: Actor[];
+    queried: boolean;
 }
 
 export interface Actor {
