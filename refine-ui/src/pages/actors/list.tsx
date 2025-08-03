@@ -1,4 +1,8 @@
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import { DataGrid,
+    GridActionsCellItem,
+    type GridColDef,
+    GridToolbar
+} from "@mui/x-data-grid";
 import {
   DeleteButton,
   EditButton,
@@ -10,12 +14,14 @@ import {  useList } from "@refinedev/core";
 import { FormControl, InputLabel, Select, MenuItem, Box, TextField, InputAdornment, IconButton, SelectChangeEvent } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
 import React, { useState, useEffect } from "react";
+import {Actor} from "../../components/model/all";
 
 export const ActorList = () => {
     const [movieId, setMovieId] = useState<number | null>(null);
     const [movieSearch, setMovieSearch] = useState("");
 
-    const { dataGridProps } = useDataGrid({
+    const { dataGridProps } = useDataGrid<Actor>({
+        resource: "actors",
         filters: {
             permanent: [
                 {
@@ -25,7 +31,10 @@ export const ActorList = () => {
                 },
             ],
         },
+        syncWithLocation: true,
     });
+
+    console.log(dataGridProps)
 
     const { data: moviesData, refetch: refetchMovies } = useList({
         resource: "movies",
@@ -215,7 +224,10 @@ export const ActorList = () => {
                 </Select>
             </FormControl>
         </Box>
-      <DataGrid {...dataGridProps} columns={columns} />
+      <DataGrid
+          {...dataGridProps}
+          columns={columns}
+      />
     </List>
   );
 };

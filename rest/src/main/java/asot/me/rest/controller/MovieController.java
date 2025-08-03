@@ -36,7 +36,8 @@ public class MovieController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
         Page<MovieDto> pageResult = movieService.getAllMovies(pageable, titleLike, genreId, actorId);
         return ResponseEntity.ok()
-                .header("X-Total-Count", String.valueOf(pageResult.getTotalElements()))
+                .header("access-control-expose-headers", "X-Total-Count")
+                .header("x-total-count", String.valueOf(pageResult.getTotalElements()))
                 .body(pageResult.getContent());
     }
 

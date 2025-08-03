@@ -120,6 +120,7 @@ function App() {
                   {
                     name: "movies",
                     list: "/movies",
+                    create: "/movies/create",
                     show: "/movies/show/:id",
                     meta: {
                       canDelete: true,
@@ -139,7 +140,6 @@ function App() {
                 options={{
                   syncWithLocation: true,
                   warnWhenUnsavedChanges: true,
-                  useNewQueryKeys: true,
                   projectId: "CvRzHH-QBM2sm-09smWv",
                   title: { text: "Refine Project", icon: <AppIcon /> },
                   reactQuery: {
