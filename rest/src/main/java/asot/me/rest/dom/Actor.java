@@ -17,7 +17,6 @@ import java.util.List;
 @Entity
 public class Actor {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     private String firstname;

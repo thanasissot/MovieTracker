@@ -127,7 +127,6 @@ function App() {
                     name: "movies",
                     list: "/movies",
                     create: "/movies/create",
-                    edit: "/movies/edit/:id",
                     show: "/movies/show/:id",
                     meta: {
                       canDelete: true,
@@ -175,13 +174,11 @@ function App() {
                     <Route path="/genres">
                       <Route index element={<GenreList />} />
                       <Route path="create" element={<GenreCreate />} />
-                      <Route path="edit/:id" element={<GenreEdit />} />
                       <Route path="show/:id" element={<GenreShow />} />
                     </Route>
                     <Route path="/movies">
                       <Route index element={<MovieList />} />
                       <Route path="create" element={<MovieCreate />} />
-                      <Route path="edit/:id" element={<MovieEdit />} />
                       <Route path="show/:id" element={<MovieShow />} />
                     </Route>
                     <Route path="/actors">
