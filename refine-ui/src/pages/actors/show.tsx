@@ -1,22 +1,29 @@
-import { TextField, Stack, Autocomplete, Typography, Divider, Box,
-  Table, TableBody, TableCell, TableContainer, TableRow, Paper, Button } from "@mui/material";
-import { useShow } from "@refinedev/core";
 import {
-  Show,
-} from "@refinedev/mui";
-import {DataGrid, GridColDef, GridRenderCellParams} from "@mui/x-data-grid";
-import { useApiUrl } from "@refinedev/core";
+  Divider,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Typography,
+  Box,
+  Card, CardContent,
+} from "@mui/material";
+import {useShow, useApiUrl} from "@refinedev/core";
+import {Show} from "@refinedev/mui";
+import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import React from "react";
-import { Delete as DeleteIcon } from "@mui/icons-material";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { Movie, Actor } from "../../components/model/all";
 
 export const ActorShow = () => {
   const apiUrl = useApiUrl();
-  const [searchText, setSearchText] = useState<string>("");
-  const [movieOptions, setMovieOptions] = useState<Movie[]>([]);
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [searchText] = useState<string>("");
+  const [, setMovieOptions] = useState<Movie[]>([]);
+
 
   const { query } = useShow({});
   const { data, isLoading } = query;
@@ -54,7 +61,7 @@ export const ActorShow = () => {
   };
 
   useEffect(() => {
-    fetchDefaultMovies().then(r => {
+    fetchDefaultMovies().then(() => {
       // nothing
     });
     // eslint-disable-next-line
@@ -88,45 +95,12 @@ export const ActorShow = () => {
     return () => clearTimeout(timeoutId);
   }, [searchText, apiUrl, movies]);
 
-  const handleRemoveMovie = async (movieId: number) => {
-    if (!record?.id) return;
-
-    try {
-      await axios.delete(`${apiUrl}/actors/${record.id}/movies`, {
-        data: [movieId]
-      });
-
-      // Update local state
-      setMovies(movies.filter(movie => movie.id !== movieId));
-    } catch (error) {
-      console.error("Error removing movie:", error);
-    }
-  };
-
-  const handleAddMovie = async () => {
-    if (!selectedMovie || !record?.id) return;
-
-    try {
-      await axios.post(`${apiUrl}/actors/${record.id}/movies`, [selectedMovie.id]);
-
-      // Update local state
-      if (!movies.some(m => m.id === selectedMovie.id)) {
-        setMovies([...movies, selectedMovie]);
-      }
-
-      // Reset selection
-      setSelectedMovie(null);
-      setSearchText("");
-    } catch (error) {
-      console.error("Error adding movie:", error);
-    }
-  };
 
   const movieColumns: GridColDef[] = [
     {
       field: "id",
       headerName: "ID",
-      width: 50,
+      width: 120,
       align: "center",
       headerAlign: "center",
     },
@@ -134,7 +108,7 @@ export const ActorShow = () => {
       field: "title",
       headerName: "Movie Title",
       flex: 1,
-      minWidth: 120,
+      minWidth: 350,
       align: "center",
       headerAlign: "center",
     },
@@ -144,31 +118,14 @@ export const ActorShow = () => {
       width: 120,
       align: "center",
       headerAlign: "center",
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      align: "center",
-      headerAlign: "center",
-      sortable: false,
-      width: 100,
-      renderCell: (params: GridRenderCellParams) => (
-          <Button
-              color="error"
-              onClick={() => handleRemoveMovie(params.row.id)}
-              startIcon={<DeleteIcon />}
-              size="small"
-          >
-          </Button>
-      ),
-    },
+    }
   ];
 
   return (
     <Show isLoading={isLoading}
           wrapperProps={{
             style: {
-              maxWidth: '800px',
+              maxWidth: '1200px',
               margin: '0 auto',
               width: '100%',
               padding: '16px'
@@ -176,6 +133,8 @@ export const ActorShow = () => {
           }}
     >
       <Stack gap={1}>
+        <Card>
+          <CardContent>
         <TableContainer component={Paper}>
           <Table>
             <TableBody>
@@ -192,54 +151,23 @@ export const ActorShow = () => {
             </TableBody>
           </Table>
         </TableContainer>
+      </CardContent>
+    </Card>
 
-        <Typography variant="h6" sx={{ mt: 4 }}>Manage Movies</Typography>
+        <Divider sx={{my: 2}}/>
 
-        {/* Search and Add Movies */}
-        <Box sx={{ display: "flex", mb: 2, gap: 1 }}>
-          <Autocomplete
-              fullWidth
-              value={selectedMovie}
-              onChange={(event, newValue) => {
-                setSelectedMovie(newValue);
-              }}
-              inputValue={searchText}
-              onInputChange={(event, newInputValue) => {
-                setSearchText(newInputValue);
-              }}
-              options={movieOptions}
-              getOptionLabel={(option) => `${option.title}`}
-              renderInput={(params) => (
-                  <TextField
-                      {...params}
-                      label="Search Movies"
-                      variant="outlined"
-                      placeholder="Type to search movies..."
-                  />
-              )}
-          />
-          <Button
-              variant="contained"
-              onClick={handleAddMovie}
-              disabled={!selectedMovie}
-              sx={{ minWidth: 100 }}
-          >
-            Add Movie
-          </Button>
-        </Box>
-
+        <Card>
+          <CardContent>
         <Typography variant="h6">Movies</Typography>
         {movies?.length > 0 ? (
-            <Box sx={{ height: 400, width: '100%' }}>
+            <Box sx={{maXwidth: '1200px'}}>
               <DataGrid
                   rows={movies}
                   columns={movieColumns}
                   disableRowSelectionOnClick
-                  autoHeight
-                  pageSizeOptions={[5, 10, 25]}
                   initialState={{
                     pagination: {
-                      paginationModel: { pageSize: 5 },
+                      paginationModel: {pageSize: 20},
                     },
                   }}
               />
@@ -249,6 +177,8 @@ export const ActorShow = () => {
               This actor has not been cast in any movies.
             </Typography>
         )}
+      </CardContent>
+    </Card>
       </Stack>
     </Show>
   );

@@ -89,7 +89,7 @@ export const ActorList = () => {
             field: "id",
             headerName: "ID",
             type: "number",
-            width: 70,
+            width: 120,
             align: "center",
             headerAlign: "center",
         },
@@ -171,7 +171,6 @@ export const ActorList = () => {
                         justifyContent: "center",
                         width: "100%"
                     }}>
-                        <EditButton hideText recordItemId={row.id} />
                         <ShowButton hideText recordItemId={row.id} />
                         <DeleteButton hideText recordItemId={row.id} />
                     </div>

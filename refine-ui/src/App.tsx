@@ -25,9 +25,9 @@ import routerBindings, {
 } from "@refinedev/react-router";
 import { AppIcon } from "./components/app-icon";
 import { ColorModeContextProvider } from "./contexts/color-mode";
-import {GenreCreate, GenreEdit, GenreList, GenreShow} from "./pages/genre";
-import {MovieCreate, MovieEdit, MovieList, MovieShow} from "./pages/movies";
-import {ActorCreate, ActorEdit, ActorList, ActorShow} from "./pages/actors";
+import {GenreList} from "./pages/genre";
+import {MovieCreate, MovieList, MovieShow} from "./pages/movies";
+import {ActorCreate, ActorList, ActorShow} from "./pages/actors";
 import { AuthProvider } from "@refinedev/core";
 import { Login } from "./pages/login";
 import axios from "axios";
@@ -130,7 +130,6 @@ function App() {
                     name: "actors",
                     list: "/actors",
                     create: "/actors/create",
-                    edit: "/actors/edit/:id",
                     show: "/actors/show/:id",
                     meta: {
                       canDelete: true,
@@ -184,7 +183,6 @@ function App() {
                     <Route path="/actors">
                       <Route index element={<ActorList />} />
                       <Route path="create" element={<ActorCreate />} />
-                      <Route path="edit/:id" element={<ActorEdit />} />
                       <Route path="show/:id" element={<ActorShow />} />
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />

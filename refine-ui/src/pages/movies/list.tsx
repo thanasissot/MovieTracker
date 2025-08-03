@@ -228,7 +228,7 @@ export const MovieList = () => {
                 field: "id",
                 headerName: "ID",
                 type: "number",
-                width: 60,
+                width: 120,
                 align: "center",
                 headerAlign: "center",
             },
