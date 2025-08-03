@@ -1,6 +1,5 @@
 import {
     DeleteButton,
-    EditButton,
     List,
     ShowButton,
     useDataGrid,
@@ -14,12 +13,15 @@ import {
 } from "@mui/material";
 import React, {useState, useEffect} from "react";
 import axios from "axios";
-import {type Genre, type Actor, FlattenedUserMovie, AppUser, UserMovie} from "../../components/model/all";
+import {type Genre, type Actor, FlattenedUserMovie, AppUser, UserMovie, Movie} from "../../components/model/all";
 import {debounce} from 'lodash';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
+import UpdateIcon from '@mui/icons-material/Update';
+import UpdateDisabledIcon from '@mui/icons-material/Update'
+import { useTable } from "@refinedev/core";
 
 export const MovieList = () => {
     const apiUrl = useApiUrl();
@@ -37,7 +39,9 @@ export const MovieList = () => {
         field: 'watched'|'favorite',
         value: boolean
     }|null>(null);
-
+    const [queryDialogOpen, setQueryDialogOpen] = useState(false);
+    const [queryMovieId, setQueryMovieId] = useState<number | null>(null);
+    const { tableQueryResult: { refetch } } = useTable();
 
     // Fetch all genres once when component mounts
     useEffect(() => {
@@ -67,7 +71,8 @@ export const MovieList = () => {
                 setActorLoading(true);
                 const response = await axios.get(`${apiUrl}/actors`, {
                     params: {
-                        _limit: 10,
+                        _start: 0,
+                        _end: 10,
                         _sort: 'lastname',
                         _order: 'asc'
                     }
@@ -118,7 +123,8 @@ export const MovieList = () => {
                 const response = await axios.get(`${apiUrl}/actors`, {
                     params: {
                         ...(searchQuery ? {name_like: searchQuery} : {}),
-                        _limit: 10,
+                        _start: 0,
+                        _end: 10,
                         _sort: 'lastname',
                         _order: 'asc'
                     }
@@ -228,6 +234,21 @@ export const MovieList = () => {
         },
     });
 
+    const handleQueryMovieRequest = async () => {
+        if (!queryMovieId) return;
+        try {
+            await axios.get(`${apiUrl}/movies/queried/${queryMovieId}`);
+            // Refresh data after successful query
+            await refetch();
+        } catch (error) {
+            console.error("Error querying movie from TMDB:", error);
+        } finally {
+            setQueryDialogOpen(false);
+            setQueryMovieId(null);
+        }
+
+    };
+
     // Helper functions to check watched/favorite status
     const isMovieWatched = (movieId: number) => {
         const userMovie = flatenedUserMovies.find(m => m.movieId === movieId);
@@ -281,16 +302,14 @@ export const MovieList = () => {
             {
                 field: "year",
                 headerName: "Year",
-                minWidth: 60,
-                flex: 1,
+                width: 80,
                 align: "center",
                 headerAlign: "center",
             },
             {
                 field: "watched",
                 headerName: "Watched",
-                minWidth: 60,
-                flex: 1,
+                width: 80,
                 align: "center",
                 headerAlign: "center",
                 renderCell: (params) =>  {
@@ -309,9 +328,9 @@ export const MovieList = () => {
                         }}
                     >
                         {watched ? (
-                            <VisibilityIcon color="primary" />
+                            <VisibilityIcon color="success" />
                         ) : (
-                            <VisibilityOffIcon color="action" sx={{ opacity: 0.6 }} />
+                            <VisibilityOffIcon color="error" sx={{ opacity: 0.6 }} />
                         )}
                     </div>
 
@@ -320,8 +339,7 @@ export const MovieList = () => {
             {
                 field: "favorite",
                 headerName: "Favorite",
-                minWidth: 60,
-                flex: 1,
+                width: 80,
                 align: "center",
                 headerAlign: "center",
                 renderCell: (params) => {
@@ -341,13 +359,43 @@ export const MovieList = () => {
                             }}
                         >
                             {favorite ? (
-                                <FavoriteIcon color="error"/>
+                                <FavoriteIcon color="success"/>
                             ) : (
-                                <FavoriteBorderIcon color="action" sx={{opacity: 0.6}}/>
+                                <FavoriteBorderIcon color="error" sx={{opacity: 0.6}}/>
                             )}
                         </div>
                     )
                 },
+            },
+            {
+                field: "queried",
+                headerName: "Queried",
+                width: 80,
+                align: "center",
+                headerAlign: "center",
+                renderCell: (params) =>  {
+                    const queried = (params.row as Movie)?.queried;
+                    return (<div
+                            style={{
+                                width: '100%',
+                                fontWeight: 500,
+                                whiteSpace: 'normal',
+                                wordWrap: 'break-word',
+                                display: '-webkit-box',
+                                overflow: 'hidden',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                padding: '6px 0 6px 16px'
+                            }}
+                        >
+                            {queried ? (
+                                <UpdateDisabledIcon color="success" />
+                            ) : (
+                                <UpdateIcon color="error" sx={{ opacity: 0.6 }} />
+                            )}
+                        </div>
+
+                    )},
             },
             {
                 field: "actions",
@@ -394,7 +442,18 @@ export const MovieList = () => {
                             >
                                 {favorite ? <FavoriteBorderIcon /> : <FavoriteIcon />}
                             </IconButton>
-                            <EditButton hideText recordItemId={row.id} />
+                            <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={() => {
+                                    setQueryMovieId(row.id);
+                                    setQueryDialogOpen(true);
+                                }}
+                                title="Query from TMDB"
+                                disabled={row.queried}
+                            >
+                                <UpdateIcon />
+                            </IconButton>
                             <ShowButton hideText recordItemId={row.id} />
                             <DeleteButton hideText recordItemId={row.id} />
                         </div>
@@ -491,6 +550,21 @@ export const MovieList = () => {
                 <DialogActions>
                     <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
                     <Button onClick={handleUpdate} color="primary" autoFocus>
+                        Confirm
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            // Add the query dialog component at the bottom of the component (after the existing Dialog)
+            <Dialog open={queryDialogOpen} onClose={() => setQueryDialogOpen(false)}>
+                <DialogTitle>Confirm Query</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to query this movie from TMDB? This will update the movie information and fetch actors.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setQueryDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={handleQueryMovieRequest} color="primary" autoFocus>
                         Confirm
                     </Button>
                 </DialogActions>

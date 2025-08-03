@@ -8,9 +8,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Long> {
     Page<Movie> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
+    Optional<Movie> findByTitleIs(String title);
 
     @Query(value = "SELECT * FROM movie WHERE :genreId = ANY(genre_ids::bigint[])",
             nativeQuery = true)

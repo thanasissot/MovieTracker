@@ -2,7 +2,7 @@ package asot.me.rest.service;
 
 import asot.me.rest.dom.*;
 import asot.me.rest.repository.*;
-import asot.me.rest.tmdb.TmdbRequestService;
+import asot.me.rest.tmdb.TmdbSearchService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -22,7 +22,7 @@ public class BootStrapService {
     private final AppUserRepository appUserRepository;
     private final UserMovieRepository userMovieRepository;
     private final GlobalSettingsRepository globalSettingsRepository;
-    private final TmdbRequestService tmdbRequestService;
+    private final TmdbSearchService tmdbSearchService;
 
     @PostConstruct
     public void init() {
@@ -39,7 +39,17 @@ public class BootStrapService {
                 log.info("Global settings created (id=1)");
             }
 
-            tmdbRequestService.fetchGenresFromApi();
+            tmdbSearchService.fetchGenresFromApi();
+
+            // add a default johndoe user
+            if (appUserRepository.count() == 0) {
+
+                AppUser appUser = AppUser.builder()
+                        .id(1L)
+                        .username("johndoe").build();
+
+                appUserRepository.save(appUser);
+            }
 
         } catch (Exception e) {
             log.error("Error during BootStrapService initialization: {}", e.getMessage());
