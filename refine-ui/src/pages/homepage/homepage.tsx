@@ -16,10 +16,14 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import {useApiUrl} from "@refinedev/core";
+import {HttpError, useApiUrl, useOne} from "@refinedev/core";
 import axios from "axios";
 
 export const Homepage = () => {
+    console.log("homepage")
+    const { data, isLoading, isError } = useOne<AppUser, HttpError>({
+        resource: "users",
+    });
     const apiUrl = useApiUrl();
     const [flatenedUserMovies, setFlatenedUserMovies] = useState<FlattenedUserMovie[] | []>([]);
     const [loading, setLoading] = useState(true);
@@ -54,7 +58,9 @@ export const Homepage = () => {
     };
 
     useEffect(() => {
-        fetchUserMovies();
+        if (!isLoading) {
+            console.log(data);
+        }
     }, []);
 
     const handleUpdate = async () => {

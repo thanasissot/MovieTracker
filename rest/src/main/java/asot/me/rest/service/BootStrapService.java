@@ -42,14 +42,15 @@ public class BootStrapService {
             tmdbSearchService.fetchGenresFromApi();
 
             // add a default johndoe user
-            if (appUserRepository.count() == 0) {
-
-                AppUser appUser = AppUser.builder()
-                        .id(1L)
-                        .username("johndoe").build();
-
-                appUserRepository.save(appUser);
-            }
+//            if (appUserRepository.count() == 0) {
+//
+//                AppUser appUser = AppUser.builder()
+//                        .id(1L)
+//                        .username("johndoe")
+//                        .build();
+//
+//                appUserRepository.save(appUser);
+//            }
 
         } catch (Exception e) {
             log.error("Error during BootStrapService initialization: {}", e.getMessage());

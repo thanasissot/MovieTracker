@@ -6,8 +6,23 @@ services:
     ports:
       - 5434:5432
     volumes:
-      - ~/apps/postgres:/data/db
+      - postegress_data:/data/db
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_DB=movietrackerdb
+  keycloak:
+    container_name: keycloakInstance
+    image: quay.io/keycloak/keycloak:latest
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    ports:
+      - "8180:8080"
+    command: start-dev
+
+volumes:
+  keycloak_data:
+  postegress_data:
